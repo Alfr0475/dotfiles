@@ -371,11 +371,14 @@ function initialize_tmux() {
     fi
 
     if [ -e $HOME/.tmux.d/tmux-powerline/.git ]; then
+        echo_passed
+        echo_comment "$HOME/.tmux.d/tmux-powerline was clone already."
+        echo
+    else
         (cd $HOME/.tmux.d/tmux-powerline && git submodule update --init) 1>/dev/null 2>/dev/null
+        echo_success
+        echo
     fi
-
-    echo_success
-    echo
 }
 
 
