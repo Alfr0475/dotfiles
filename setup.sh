@@ -294,6 +294,7 @@ function setup_zsh() {
             echo_passed
             echo_comment "$HOME/.zsh.d was clone already."
             echo
+            initialize_zsh
             return
         fi
     fi
@@ -304,6 +305,7 @@ function setup_zsh() {
         if [ $? -eq 0 ]; then
             echo_success
             echo
+            initialize_zsh
         else
             echo_failure
             echo
@@ -311,6 +313,59 @@ function setup_zsh() {
     else
         echo_passed
         echo_comment "Exists file."
+        echo
+    fi
+}
+
+
+function initialize_zsh() {
+    echo -n "  Initialize zsh..."
+
+    if ! [ -x "`which git`" ]; then
+        echo_passed
+        echo_comment "Not install git."
+        echo
+        return
+    fi
+
+    echo
+
+    # auto-fu setup
+    echo -n "    Initialize auto-fu.zsh..."
+
+    if [ -e $HOME/.zsh.d/modules/auto-fu.zsh/.git ]; then
+        echo_passed
+        echo_comment "$HOME/.zsh.d/modules/auto-fu.zsh was clone already."
+        echo
+    else
+        (cd $HOME/.zsh.d/modules/auto-fu.zsh && git submodule update --init) 1>/dev/null 2>/dev/null
+        echo_success
+        echo
+    fi
+
+    # tw-zsh-completion setup
+    echo -n "    Initialize tw-zsh-completion..."
+
+    if [ -e $HOME/.zsh.d/modules/tw-zsh-completion/.git ]; then
+        echo_passed
+        echo_comment "$HOME/.zsh.d/modules/tw-zsh-completion was clone already."
+        echo
+    else
+        (cd $HOME/.zsh.d/modules/tw-zsh-completion && git submodule update --init) 1>/dev/null 2>/dev/null
+        echo_success
+        echo
+    fi
+
+    # zsh-completion setup
+    echo -n "    Initialize zsh-completion..."
+
+    if [ -e $HOME/.zsh.d/modules/zsh-completion/.git ]; then
+        echo_passed
+        echo_comment "$HOME/.zsh.d/modules/zsh-completion was clone already."
+        echo
+    else
+        (cd $HOME/.zsh.d/modules/zsh-completion && git submodule update --init) 1>/dev/null 2>/dev/null
+        echo_success
         echo
     fi
 }
