@@ -361,7 +361,7 @@ function setup_tmux() {
 
 
 function initialize_tmux() {
-    echo -n "Initialize tmux..."
+    echo -n "  Initialize tmux..."
 
     if ! [ -x "`which git`" ]; then
         echo_passed
@@ -427,7 +427,7 @@ function setup_tmuxinator() {
 
 
 function initialize_tmuxinator() {
-    echo -n "Initialize tmuxinator..."
+    echo -n "  Initialize tmuxinator..."
 
     if ! [ -x "`which git`" ]; then
         echo_passed
