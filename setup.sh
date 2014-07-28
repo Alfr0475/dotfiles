@@ -437,11 +437,14 @@ function initialize_tmuxinator() {
     fi
 
     if [ -e $HOME/.tmuxinator/tmuxinator/.git ]; then
+        echo_passed
+        echo_comment "$HOME/.tmuxinator/tmuxinator was clone already."
+        echo
+    else
         (cd $HOME/.tmuxinator/tmuxinator && git submodule update --init) 1>/dev/null 2>/dev/null
+        echo_success
+        echo
     fi
-
-    echo_success
-    echo
 }
 
 
