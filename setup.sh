@@ -175,9 +175,10 @@ function clear_files() {
 # dotファイル設定
 #----------------------------------------------------------------------------
 function setup_dotfiles() {
+    echo "Link dotfiles"
     for file in ${DOTFILES[@]}
     do
-        echo -n $file
+        echo -n "  $file"
         if [ -e $HOME/$file ]; then
             if ! [ -L $HOME/$file ]; then
                 if ! [ -e $HOME/$file.dot ]; then
