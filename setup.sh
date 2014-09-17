@@ -535,7 +535,7 @@ function setup_emacs() {
 
     # GitHubからEmacs設定をclone
     if ! [ -e $HOME/.emacs.d ]; then
-        git clone https://github.com/Alfr0475/Emacs.git $HOME/.emacs.d 1>/dev/null 2>/dev/null
+        git clone https://github.com/Alfr0475/emacs.d.git $HOME/.emacs.d 1>/dev/null 2>/dev/null
         if [ $? -eq 0 ]; then
             echo_success
             echo
@@ -577,7 +577,7 @@ function setup_vim() {
 
     # GitHubからVim設定をclone
     if ! [ -e $HOME/.vim ]; then
-        git clone https://github.com/Alfr0475/Vim.git $HOME/.vim 1>/dev/null 2>/dev/null
+        git clone https://github.com/Alfr0475/vim.d.git $HOME/.vim 1>/dev/null 2>/dev/null
         if [ $? -eq 0 ]; then
             (cd $HOME/.vim && git submodule init 1>/dev/null 2>/dev/null)
             (cd $HOME/.vim && git submodule update 1>/dev/null 2>/dev/null)
