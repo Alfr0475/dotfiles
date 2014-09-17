@@ -11,7 +11,7 @@ SETCOLOR_FAILURE="echo -en \\033[1;31m"
 SETCOLOR_WARNING="echo -en \\033[1;33m"
 SETCOLOR_NORMAL="echo -en \\033[0;39m"
 MOVE_TO_COMMENT_COL="echo -en \\033[${COMMENT_COL}G"
-DOTFILES=( '.bashrc' '.bash_profile' '.gitconfig' '.vimrc' '.tigrc' '.zshrc' '.zshenv' '.tmux.conf' '.tmux-powerlinerc')
+DOTFILES=( '.bashrc' '.bash_profile' '.gitconfig' '.gitignore' '.gitattribute' '.vimrc' '.tigrc' '.zshrc' '.zshenv' '.tmux.conf' '.tmux-powerlinerc')
 
 #----------------------------------------------------------------------------
 # Common関数群
