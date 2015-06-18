@@ -4,4 +4,3 @@
 if [ -d $HOME/.zsh.d ]; then
     source $HOME/.zsh.d/zshrc
 fi
-
