@@ -5,6 +5,7 @@
 [core]
 	excludesfile = ~/.gitignore
 	attributesfile = ~/.gitattribute
+	autocrlf = input
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
 	path = 

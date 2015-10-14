@@ -12,3 +12,7 @@
 *.py diff=python
 *.rb diff=ruby
 *.js diff=java
+
+
+*.ogg binary
+*.m4a binary
