@@ -1,9 +1,9 @@
 [include]
 	path = ~/.gitconfig.local
 [ghq]
-	root = ~/work/sources/github
+	root = ~/work/sources/git
 [core]
-	excludesfile = ~/.gitignore
+	excludesfile = /Users/skoga/.gitignore
 	attributesfile = ~/.gitattribute
 	autocrlf = input
 [difftool "sourcetree"]
