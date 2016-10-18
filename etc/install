@@ -207,6 +207,11 @@ function is_exists() {
     return $?
 }
 
+# has is wrapper function
+has() {
+    is_exists "$@"
+}
+
 # is_debug returns true if $DEBUG is set
 function is_debug() {
     if [ "$DEBUG" = 1 ]; then
@@ -267,7 +272,7 @@ dotfiles_logo="
   *** WHAT IS INSIDE? ***
   1. Download https://github.com/Alfr0475/dotfiles.git
   2. Symlinking dot files to your home directory
-  3. Execute all sh files within \`etc/init/\` (optional)
+  3. Execute all sh files within \`etc/init/\`
 
   See the README for documentation.
   https://github.com/Alfr0475/dotfiles
@@ -332,23 +337,21 @@ function dotfiles_deploy() {
 }
 
 function dotfiles_initialize() {
-    if [ "$1" = "init" ]; then
-        e_newline
-        e_header "Initializing dotfiles..."
+    e_newline
+    e_header "Initializing dotfiles..."
 
-        if is_debug; then
-            :
+    if is_debug; then
+        :
+    else
+        if [ -f Makefile ]; then
+            make init
         else
-            if [ -f Makefile ]; then
-                make init
-            else
-                log_fail "Makefile: not found"
-                exit 1
-            fi
-        fi &&
+            log_fail "Makefile: not found"
+            exit 1
+        fi
+    fi &&
 
-            e_newline && e_done "Initialize"
-    fi
+        e_newline && e_done "Initialize"
 }
 
 function dotfiles_install() {
@@ -361,7 +364,7 @@ function dotfiles_install() {
     dotfiles_deploy &&
 
     # 3. Execute all sh files within etc/init/
-    dotfiles_initialize "$@"
+    dotfiles_initialize
 }
 
 if echo "$-" | grep -q "i"; then
@@ -373,7 +376,6 @@ if echo "$-" | grep -q "i"; then
 else
     # bash a.sh
     if [ "$0" = "${BASH_SOURCE:-}" ]; then
-        echo "hogehoge"
         exit
     fi
 
@@ -385,8 +387,9 @@ else
             exit
         fi
 
+        trap "e_error 'terminated'; exit 1" INT ERR
         echo "$dotfiles_logo"
-        dotfiles_install "$@"
+        dotfiles_install
 
         if [ -p /dev/stdin ]; then
             e_warning "Now continue with Rebooting your shell"
