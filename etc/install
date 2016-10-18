@@ -212,6 +212,12 @@ has() {
     is_exists "$@"
 }
 
+# die returns exit code error and echo error message
+die() {
+    e_error "$1" 1>&2
+    exit "${2:-1}"
+}
+
 # is_debug returns true if $DEBUG is set
 function is_debug() {
     if [ "$DEBUG" = 1 ]; then
