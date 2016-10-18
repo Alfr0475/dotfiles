@@ -9,13 +9,13 @@ function is_zsh() {
 }
 
 # ostype returns the lowercase OS name
-ostype() {
+function ostype() {
     # shellcheck disable=SC2119
     uname | lower
 }
 
 # os_detect export the PLATFORM variable as you see fit
-os_detect() {
+function os_detect() {
     export PLATFORM
     case "$(ostype)" in
         *'linux'*)  PLATFORM='linux'   ;;
@@ -26,7 +26,7 @@ os_detect() {
 }
 
 # is_osx returns true if running OS is Macintosh
-is_osx() {
+function is_osx() {
     os_detect
     if [ "$PLATFORM" = "osx" ]; then
         return 0
@@ -37,7 +37,7 @@ is_osx() {
 alias is_mac=is_osx
 
 # is_linux returns true if running OS is GNU/Linux
-is_linux() {
+function is_linux() {
     os_detect
     if [ "$PLATFORM" = "linux" ]; then
         return 0
@@ -47,7 +47,7 @@ is_linux() {
 }
 
 # is_bsd returns true if running OS is FreeBSD
-is_bsd() {
+function is_bsd() {
     os_detect
     if [ "$PLATFORM" = "bsd" ]; then
         return 0
@@ -57,7 +57,7 @@ is_bsd() {
 }
 
 # get_os returns OS name of the platform that is running
-get_os() {
+function get_os() {
     local os
     for os in osx linux bsd; do
         if is_$os; then
@@ -109,7 +109,7 @@ function e_failure() {
     die "${1:-$FUNCNAME}"
 }
 
-ink() {
+function ink() {
     if [ "$#" -eq 0 -o "$#" -gt 2 ]; then
         echo "Usage: ink <color> <text>"
         echo "Colors:"
@@ -144,7 +144,7 @@ ink() {
     printf "${open}${color}${text}${close}"
 }
 
-logging() {
+function logging() {
     if [ "$#" -eq 0 -o "$#" -gt 2 ]; then
         echo "Usage: ink <fmt> <msg>"
         echo "Formatting Options:"
@@ -181,39 +181,71 @@ logging() {
     timestamp; ink "$color" "$text"; echo
 }
 
-log_pass() {
+function log_pass() {
     logging SUCCESS "$1"
 }
 
-log_fail() {
+function log_fail() {
     logging ERROR "$1" 1>&2
 }
 
-log_fail() {
+function log_fail() {
     logging WARN "$1"
 }
 
-log_info() {
+function log_info() {
     logging INFO "$1"
 }
 
-log_echo() {
+function log_echo() {
     logging TITLE "$1"
 }
 
 # is_exists returns true if executable $1 exists in $PATH
-is_exists() {
+function is_exists() {
     which "$1" >/dev/null 2>&1
     return $?
 }
 
 # is_debug returns true if $DEBUG is set
-is_debug() {
+function is_debug() {
     if [ "$DEBUG" = 1 ]; then
         return 0
     else
         return 1
     fi
+}
+
+# lower returns a copy of the string with all letters mapped to their lower case.
+# shellcheck disable=SC2120
+function lower() {
+    if [ $# -eq 0 ]; then
+        cat <&0
+    elif [ $# -eq 1 ]; then
+        if [ -f "$1" -a -r "$1" ]; then
+            cat "$1"
+        else
+            echo "$1"
+        fi
+    else
+        return 1
+    fi | tr "[:upper:]" "[:lower:]"
+}
+
+# upper returns a copy of the string with all letters mapped to their upper case.
+# shellcheck disable=SC2120
+function upper() {
+    if [ $# -eq 0 ]; then
+        cat <&0
+    elif [ $# -eq 1 ]; then
+        if [ -f "$1" -a -r "$1" ]; then
+            cat "$1"
+        else
+            echo "$1"
+        fi
+    else
+        return 1
+    fi | tr "[:lower:]" "[:upper:]"
 }
 
 
