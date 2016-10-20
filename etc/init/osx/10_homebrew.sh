@@ -4,29 +4,31 @@
 trap 'echo Error: $0:$LINENO stopped; exit 1' ERR INT
 set -eu
 
-# Load common library that is most important and
-# constructed with many minimal functions
-# For more information, see etc/README.md
+# common ライブラリ
 . "$DOTPATH"/etc/lib/common.sh
 
-# This script is only supported with OS X
+# OSXのみ
 if ! is_osx; then
     log_fail "error: this script is only supported with osx"
     exit 1
 fi
 
+# 既にHomebrewがインストールされてたら終了
 if has "brew"; then
     log_pass "brew: already installed"
     exit
 fi
 
-# The script is dependent on ruby
+# Rubyが無ければ終了
 if ! has "ruby"; then
     log_fail "error: require: ruby"
     exit 1
 fi
 
+# Homebrewインストール
+# たまにURLが変わるので要メンテ
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
 if has "brew"; then
     brew doctor
 else

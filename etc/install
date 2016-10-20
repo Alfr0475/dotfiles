@@ -1,5 +1,15 @@
 #!/bin/bash
 
+export PLATFORM
+
+_TAB_="$(printf "\t")"
+_SPACE_=' '
+_BLANK_="${_SPACE_}${_TAB_}"
+_IFS_="$IFS"
+
+#----------------------------------------
+# Shell判定
+#----------------------------------------
 function is_bash() {
     [ -n "$BASH_VERSION" ]
 }
@@ -8,13 +18,16 @@ function is_zsh() {
     [ -n "$ZSH_VERSION" ]
 }
 
-# ostype returns the lowercase OS name
+
+#----------------------------------------
+# OS判定
+#----------------------------------------
+# OS名取得
 function ostype() {
-    # shellcheck disable=SC2119
     uname | lower
 }
 
-# os_detect export the PLATFORM variable as you see fit
+# 環境変数にOS名設定
 function os_detect() {
     export PLATFORM
     case "$(ostype)" in
@@ -25,7 +38,7 @@ function os_detect() {
     esac
 }
 
-# is_osx returns true if running OS is Macintosh
+# OSX判定
 function is_osx() {
     os_detect
     if [ "$PLATFORM" = "osx" ]; then
@@ -36,7 +49,7 @@ function is_osx() {
 }
 alias is_mac=is_osx
 
-# is_linux returns true if running OS is GNU/Linux
+# GNU/Linux判定
 function is_linux() {
     os_detect
     if [ "$PLATFORM" = "linux" ]; then
@@ -46,7 +59,7 @@ function is_linux() {
     fi
 }
 
-# is_bsd returns true if running OS is FreeBSD
+# FreeBSD判定
 function is_bsd() {
     os_detect
     if [ "$PLATFORM" = "bsd" ]; then
@@ -56,7 +69,7 @@ function is_bsd() {
     fi
 }
 
-# get_os returns OS name of the platform that is running
+# OS名取得
 function get_os() {
     local os
     for os in osx linux bsd; do
@@ -66,6 +79,9 @@ function get_os() {
     done
 }
 
+#----------------------------------------
+# echo制御
+#----------------------------------------
 function e_newline() {
     printf "\n"
 }
@@ -109,6 +125,7 @@ function e_failure() {
     die "${1:-$FUNCNAME}"
 }
 
+# 色と文字列を指定して色付き文字の出力
 function ink() {
     if [ "$#" -eq 0 -o "$#" -gt 2 ]; then
         echo "Usage: ink <color> <text>"
@@ -144,9 +161,10 @@ function ink() {
     printf "${open}${color}${text}${close}"
 }
 
+# フォーマットと文字列を指定してタイムスタンプ付きの文字列出力
 function logging() {
     if [ "$#" -eq 0 -o "$#" -gt 2 ]; then
-        echo "Usage: ink <fmt> <msg>"
+        echo "Usage: logging <fmt> <msg>"
         echo "Formatting Options:"
         echo "  TITLE, ERROR, WARN, INFO, SUCCESS"
         return 1
@@ -201,34 +219,42 @@ function log_echo() {
     logging TITLE "$1"
 }
 
-# is_exists returns true if executable $1 exists in $PATH
+#----------------------------------------
+# ユーティリティ
+#----------------------------------------
+# パスにコマンドが存在するかの確認
 function is_exists() {
     which "$1" >/dev/null 2>&1
     return $?
 }
 
-# has is wrapper function
-has() {
+# is_existsのラッパー
+function has() {
     is_exists "$@"
 }
 
 # die returns exit code error and echo error message
-die() {
+function die() {
     e_error "$1" 1>&2
     exit "${2:-1}"
 }
 
-# is_debug returns true if $DEBUG is set
-function is_debug() {
-    if [ "$DEBUG" = 1 ]; then
-        return 0
+# 改行なしecho
+# -n をエミュレート
+function echon() {
+    echo "$*" | tr -d '\n'
+}
+
+# noecho is the same as echon
+function noecho() {
+    if [ "$(echo -n)" = "-n" ]; then
+        echo "${*:-> }\c"
     else
-        return 1
+        echo -n "${@:-> }"
     fi
 }
 
-# lower returns a copy of the string with all letters mapped to their lower case.
-# shellcheck disable=SC2120
+# 小文字化
 function lower() {
     if [ $# -eq 0 ]; then
         cat <&0
@@ -243,8 +269,7 @@ function lower() {
     fi | tr "[:upper:]" "[:lower:]"
 }
 
-# upper returns a copy of the string with all letters mapped to their upper case.
-# shellcheck disable=SC2120
+# 大文字化
 function upper() {
     if [ $# -eq 0 ]; then
         cat <&0
@@ -259,15 +284,97 @@ function upper() {
     fi | tr "[:lower:]" "[:upper:]"
 }
 
+# 文字数カウント
+function len() {
+    local length
+    length="$(echo "$1" | wc -c | sed -e 's/ *//')"
+    #echo "$(expr "$length" - 1)"
+    echo $(("$length" - 1))
+}
 
+#----------------------------------------
+# チェック関数
+#----------------------------------------
+# ログインShellか確認
+function is_login_shell() {
+    [ "$SHLVL" = 1 ]
+}
+
+# GITリポジトリか確認
+function is_git_repo() {
+    git rev-parse --is-inside-work-tree &>/dev/null
+    return $?
+}
+
+# screen起動中
+function is_screen_running() {
+    [ ! -z "$STY" ]
+}
+
+# tmux起動中
+function is_tmux_runnning() {
+    [ ! -z "$TMUX" ]
+}
+
+# screen or tmux起動中
+function is_screen_or_tmux_running() {
+    is_screen_running || is_tmux_runnning
+}
+
+# sshコマンドでログインしてるか
+function is_ssh_running() {
+    [ ! -z "$SSH_CLIENT" ]
+}
+
+# 数値確認
+function is_number() {
+    if [ $# -eq 0 ]; then
+        cat <&0
+    else
+        echo "$1"
+    fi | grep -E '^[0-9]+$' >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+alias is_int=is_number
+alias is_num=is_number
+
+# ブランク判定
+is_empty() {
+    if [ $# -eq 0 ]; then
+        cat <&0
+    else
+        echo "$1"
+    fi | grep -E "^[$_BLANK_]*$" >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# インタラクティブモード判定
+is_interactive() {
+    if [ "${-/i/}" != "$-" ]; then
+        return 0
+    fi
+    return 1
+}
+
+# dotfilesのパス格納変数の定義
 if [ -z "${DOTPATH:-}" ]; then
     DOTPATH=~/.dotfiles
     export DOTPATH
 fi
 
+# リポジトリのURL定義
 DOTFILES_GITHUB="https://github.com/Alfr0475/dotfiles.git"
 export DOTFILES_GITHUB
 
+# ロゴ出力
 dotfiles_logo="
       _    _  __       ___  _  _ _____ ____        _       _    __ _ _
      / \  | |/ _|_ __ / _ \| || |___  | ___|    __| | ___ | |_ / _(_) | ___  ___
@@ -297,28 +404,25 @@ function dotfiles_download() {
     e_newline
     e_header "Downloading dotfile..."
 
-    if is_debug; then
-        :
-    else
-        if is_exists "git"; then
-            git clone --recursive "$DOTFILES_GITHUB" "$DOTPATH"
-        elif is_exists "curl" || is_exists "wget"; then
-            local tarball="https://github.com/Alfr0475/dotfiles/archive/master.tar.gz"
-            if is_exists "curl"; then
-                curl -L "$tarball"
-            elif is_exists "wget"; then
-                wget -O - "$tarball"
-            fi | tar xvz
+    if is_exists "git"; then
+        # submoduleも一緒にcloneする
+        git clone --recursive "$DOTFILES_GITHUB" "$DOTPATH"
+    elif is_exists "curl" || is_exists "wget"; then
+        local tarball="https://github.com/Alfr0475/dotfiles/archive/master.tar.gz"
+        if is_exists "curl"; then
+            curl -L "$tarball"
+        elif is_exists "wget"; then
+            wget -O - "$tarball"
+        fi | tar xvz
 
-            if [ ! -d dotfiles-master ]; then
-                log_fail "dotfiles-master: not found"
-                exit 1
-            fi
-            command mv -f dotfiles-master "$DOTPATH"
-        else
-            log_fail "curl or wget required"
+        if [ ! -d dotfiles-master ]; then
+            log_fail "dotfiles-master: not found"
             exit 1
         fi
+        command mv -f dotfiles-master "$DOTPATH"
+    else
+        log_fail "curl or wget required"
+        exit 1
     fi
 }
 
@@ -333,29 +437,22 @@ function dotfiles_deploy() {
 
     cd "$DOTPATH"
 
-    if is_debug; then
-        :
-    else
-        make deploy
-    fi &&
+    make deploy &&
 
         e_newline && e_done "Deploy"
 }
 
 function dotfiles_initialize() {
+    # -c の引数が init の時のみ実行
     if [ "$1" = "init" ]; then
         e_newline
         e_header "Initializing dotfiles..."
 
-        if is_debug; then
-            :
+        if [ -f Makefile ]; then
+            make init
         else
-            if [ -f Makefile ]; then
-                make init
-            else
-                log_fail "Makefile: not found"
-                exit 1
-            fi
+            log_fail "Makefile: not found"
+            exit 1
         fi &&
 
             e_newline && e_done "Initialize"
@@ -363,40 +460,48 @@ function dotfiles_initialize() {
 }
 
 function dotfiles_install() {
-    # 1. Download the repository
-    #
-    # Priority: git > curl > wget
+    # リポジトリダウンロード
     dotfiles_download &&
 
-    # 2. Deploy dotfiles to your home directory
+    # dotfilesの配置
     dotfiles_deploy &&
 
-    # 3. Execute all sh files within etc/init/
+    # 初期設定スクリプトの実行
     dotfiles_initialize "$@"
 }
 
 if echo "$-" | grep -q "i"; then
-    # -> source a.sh
-    VITALIZED=1
-    export VITALIZED
+    # インタラクティブモードで読み込まれたらインストール処理は実行しない
+    # ライブラリとして機能する
+    NON_INTARACTIVE=1
+    export NON_INTARACTIVE
 
-    : return
+    return
 else
-    # bash a.sh
-    if [ "$0" = "${BASH_SOURCE:-}" ]; then
+    # bash a.sh の形を無視する
+    if [ "$0" = "${BASH_SOURCE}" ]; then
         exit
     fi
 
-    # cat a.sh | bash
     # bash -c "$(cat a.sh)"
-    if [ -n "${BASH_EXECUTION_STRING:-}" ] || [ -p /dev/stdin ]; then
-        # if already vitalized, skip to run dotfiles_install
-        if [ "${VITALIZED:=0}" = 1 ]; then
+    # cat a.sh | bash
+    # 上記２つの形を有効にする
+    #
+    # BASH_EXECUTION_STRING : -c の引数で渡された文字列
+    # -p : 名前付きパイプであれば真
+    if [ -n "${BASH_EXECUTION_STRING}" ] || [ -p /dev/stdin ]; then
+        # 既にインタラクティブモードで読み込まれていたらインストール処理は実行しない
+        if [ "${NON_INTARACTIVE:=0}" = 1 ]; then
             exit
         fi
 
+        # error hook登録
+        # Ctrl+cか終了値が0以外なら引数のコマンドを実行する
         trap "e_error 'terminated'; exit 1" INT ERR
+
         echo "$dotfiles_logo"
+
+        # $@ に引数を渡す場合は bash に -s で引数を渡す
         dotfiles_install "$@"
 
         if [ -p /dev/stdin ]; then
@@ -404,7 +509,7 @@ else
         else
             e_newline
             e_arrow "Restarting your shell..."
-            exec "${SHELL:-/bin/zsh}"
+            exec "${SHELL}"
         fi
     fi
 fi
