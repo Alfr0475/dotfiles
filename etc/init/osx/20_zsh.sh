@@ -26,8 +26,13 @@ if ! is_brew_install "zsh"; then
                 zsh_path="$(which zsh)"
 
                 if ! grep -xq "${zsh_path:=/bin/zsh}" /etc/shells; then
-                    log_fail "oh, you should append '$zsh_path' to /etc/shells"
-                    exit 1
+                    echo "${zsh_path}" >> /etc/shells
+                    if [ $? -eq 0 ]; then
+                        log_pass "Add shell to /etc/shells for $zsh_path"
+                    else
+                        log_fail "Do not add shell to /etc/shells for $zsh_path"
+                        exit 1
+                    fi
                 fi
 
                 if [ -x "$zsh_path" ]; then

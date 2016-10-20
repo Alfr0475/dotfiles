@@ -207,7 +207,7 @@ function log_fail() {
     logging ERROR "$1" 1>&2
 }
 
-function log_fail() {
+function log_warn() {
     logging WARN "$1"
 }
 
