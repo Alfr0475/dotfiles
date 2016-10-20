@@ -1,0 +1,27 @@
+# -*- mode: snippet -*-
+# name: ファイルの先頭コメント
+# key: comment-file
+# group: comment
+# contributor: Seiki Koga <seikikoga@gamania.com>
+# --
+/**
+ * ${1:ファイルタイトル}
+ *
+ * <pre>
+ * ${2:ファイル概要}
+ *
+ * PHP versions 5
+ * </pre>
+ *
+ * @category   ${3:category}
+ * @package    ${4:package}
+${5: * @subpackage ${6:subpackage}}
+ * @author     Seiki Koga <seikikoga@gamania.com>
+ * @copyright  2011-2013 Gamania Degital Entertainment Co.,Ltd.
+ * @license    http://www.opensource.org/licenses/mit-license.php MIT License
+ * @version    SVN: $Rev$
+ * @access     ${7:$$(yas-choose-value '("public" "protected" "private"))}
+ * @link       $HeadURL$
+${8: * @since      ファイルやクラスが、パッケージの初リリースの後で加えられた場合、このタグを使用します。}
+${9: * @deprecated ファイルやクラスが、もはや使われなくなっているが、 互換性のため残されている場合にこのタグを使用します。}
+ */
