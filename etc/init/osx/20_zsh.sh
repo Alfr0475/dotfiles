@@ -7,7 +7,7 @@ set -eu
 # common ライブラリ
 . "$DOTPATH"/etc/lib/common.sh
 
-if ! has "zsh"; then
+if ! is_brew_install "zsh"; then
 
     # Install zsh
     case "$(get_os)" in

@@ -321,6 +321,19 @@ function is_screen_or_tmux_running() {
     is_screen_running || is_tmux_runnning
 }
 
+function is_brew_install() {
+    if has "brew"; then
+        if brew list | grep "$1"; then
+            return 0
+        else
+            return 1
+        fi
+    else
+        log_fail "error: require: Homebrew"
+        exit 1
+    fi
+}
+
 # sshコマンドでログインしてるか
 function is_ssh_running() {
     [ ! -z "$SSH_CLIENT" ]
