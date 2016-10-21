@@ -15,6 +15,10 @@ if [ -z "$DOTPATH" ]; then
     exit 1
 fi
 
+if [ -z "$ASSETSPATH" ]; then
+    export "$DOTPATH"/etc/init/assets
+fi
+
 # Ask for the administrator password upfront
 sudo -v
 

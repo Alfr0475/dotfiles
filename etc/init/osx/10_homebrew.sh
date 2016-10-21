@@ -37,3 +37,18 @@ else
 fi
 
 log_pass "brew: installed successfully"
+
+# caskがインストール済みだったら終了
+if is_brew_tap_install "caskroom/cask"; then
+    log_pass "brew cask: already installed"
+    exit 1
+fi
+
+brew tap caskroom/cask
+
+if is_brew_tap_install "caskroom/cask"; then
+    log_pass "brew cask: installed successfully"
+else
+    log_fail "error: brew cask: failed to install"
+    exit 1
+fi

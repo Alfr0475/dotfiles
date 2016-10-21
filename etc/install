@@ -344,6 +344,16 @@ function is_brew_install() {
     fi
 }
 
+function is_brew_tap_install() {
+    if has "brew"; then
+        brew tap-info "$1" >/dev/null 2>&1;
+        return $?
+    else
+        log_fail "error: require: Homebrew"
+        exit 1
+    fi
+}
+
 # sshコマンドでログインしてるか
 function is_ssh_running() {
     [ ! -z "$SSH_CLIENT" ]
