@@ -17,7 +17,7 @@ fi
 
 if [ -z "${ASSETSPATH:-}" ]; then
     ASSETSPATH="$DOTPATH"/etc/init/assets
-    export "${ASSETSPATH}"
+    export ASSETSPATH
 fi
 
 # Ask for the administrator password upfront
