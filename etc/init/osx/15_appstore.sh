@@ -25,6 +25,8 @@ if ! has "mas"; then
     log_pass "mas: installed successfully"
 fi
 
+mas signin 'alfr0475@gmail.com'
+
 # App Storeでインストールする一覧を読み込む
 . "$ASSETSPATH"/appstore/applist.sh
 
