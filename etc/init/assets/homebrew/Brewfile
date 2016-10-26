@@ -1,0 +1,48 @@
+tap 'alfr0475/formula'
+tap 'homebrew/bundle'
+tap 'homebrew/core'
+tap 'homebrew/dupes'
+tap 'sanemat/font'
+brew 'android-sdk'
+brew 'android-ndk'
+brew 'awscli'
+brew 'nkf'
+brew 'cmigemo'
+brew 'coreutils'
+brew 'sqlite'
+brew 'ffmpeg', args: ['with-libvorbis', 'with-libvpx']
+brew 'figlet'
+brew 'go'
+brew 'ghq'
+brew 'global'
+brew 'gnutls'
+brew 'htop-osx'
+brew 'mono'
+brew 'mysql'
+brew 'peco'
+brew 'putty'
+brew 'reattach-to-user-namespace'
+brew 'source-highlight'
+brew 'tig'
+brew 'tmux'
+brew 'tmux-mem-cpu-load'
+brew 'trash'
+brew 'vim'
+brew 'wget'
+brew 'zsh'
+brew 'alfr0475/formula/emacs-ime-patch', args: ['with-cocoa', 'with-gnutls']
+brew 'homebrew/dupes/apple-gcc42'
+brew 'sanemat/font/ricty', args: ['vim-powerline']
+mas 'Xcode (8.0)', id: 497799835
+mas 'Keynote (6.6.2)', id: 409183694
+mas 'iMovie (10.1.2)', id: 408981434
+mas '1Password (6.3.4)', id: 443987910
+mas 'Janetter (4.3.2)', id: 478844335
+mas 'Caffeine (1.1.1)', id: 411246225
+mas 'Wunderlist (3.4.5)', id: 410628904
+mas 'Slack (2.0.3)', id: 803453959
+mas 'Pages (5.6.2)', id: 409201541
+mas 'LINE (4.9.0)', id: 539883307
+mas 'GarageBand (10.1.2)', id: 682658836
+mas 'MindNode (2.4.2)', id: 992076693
+mas 'Numbers (3.6.2)', id: 409203825
