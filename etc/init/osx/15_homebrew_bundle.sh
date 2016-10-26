@@ -19,6 +19,6 @@ if ! has "brew"; then
     exit 1
 fi
 
-brew bundle --file="${ASSETPATH}"/homebrew/Brewfile
+brew bundle --file="${DOTPATH}"/etc/init/assets/homebrew/Brewfile
 
 log_pass "brew bundle: installed successfully"
