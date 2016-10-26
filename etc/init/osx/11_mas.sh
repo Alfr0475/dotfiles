@@ -13,12 +13,17 @@ if ! is_osx; then
     exit 1
 fi
 
-# Homebrewがインストールされてなければ終了
+# Homebrewが無ければ終了
 if ! has "brew"; then
     log_fail "error: require: brew"
-    exit 1
+    exit
 fi
 
-brew bundle -v --file="${DOTPATH}"/etc/init/assets/homebrew/Brewfile
+# masインストール
+brew install mas
 
-log_pass "brew bundle: installed successfully"
+# サインイン
+mas signout
+mas signin "alfr0475@gmail.com"
+
+log_pass "mas: installed successfully"
