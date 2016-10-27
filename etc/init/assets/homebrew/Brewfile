@@ -33,7 +33,6 @@ brew 'homebrew/dupes/apple-gcc42'
 brew 'sanemat/font/ricty', args: ['vim-powerline']
 mas 'Xcode (8.0)', id: 497799835
 mas '1Password (6.3.4)', id: 443987910
-mas 'Caffeine (1.1.1)', id: 411246225
 mas 'Wunderlist (3.4.5)', id: 410628904
 mas 'LINE (4.9.0)', id: 539883307
 mas 'MindNode (2.4.2)', id: 992076693
