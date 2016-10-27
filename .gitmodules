@@ -10,3 +10,9 @@
 [submodule "src/.emacs.d"]
 	path = src/.emacs.d
 	url = git@github.com:Alfr0475/emacs.d.git
+[submodule "src/.iterm2.d"]
+	path = src/.iterm2.d
+	url = git@github.com:Alfr0475/iterm2.d.git
+[submodule "src/.alfred.d"]
+	path = src/.alfred.d
+	url = git@github.com:Alfr0475/alfred.d.git
