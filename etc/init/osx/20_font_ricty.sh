@@ -26,7 +26,7 @@ brew tap 'sanemat/font'
 brew install sanemat/font/ricty --vim-powerline
 
 # フォントをコピーしてキャッシュクリア
-cp -f /usr/local/opt/ricty/share/fonts/Ricty*.ttf ~/Library/Fonts/
+cp -f "$(brew --prefix ricty)"/share/fonts/Ricty*.ttf ~/Library/Fonts/
 fc-cache -vf
 
 log_pass "Ricty font: installed successfully"
