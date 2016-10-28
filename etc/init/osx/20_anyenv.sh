@@ -16,8 +16,8 @@ if ! has "anyenv"; then
     git clone https://github.com/riywo/anyenv "${HOME}"/.anyenv
 
     log_echo "Install anyenv-update"
-    mkdir -p "$(anyenv root)"/plugins
-    git clone https://github.com/znz/anyenv-update.git "$(anyenv root)"/plugins/anyenv-update
+    mkdir -p "${HOME}"/.anyenv/plugins
+    git clone https://github.com/znz/anyenv-update.git "${HOME}"/.anyenv/plugins/anyenv-update
 
     log_pass "anyenv: installed successfully"
 fi
