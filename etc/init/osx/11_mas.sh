@@ -19,6 +19,12 @@ if ! has "brew"; then
     exit
 fi
 
+# masがインストールされていれば終了
+if has "mas"; then
+    log_pass "mas: already installed"
+    exit
+fi
+
 # masインストール
 brew install mas
 
