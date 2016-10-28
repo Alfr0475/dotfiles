@@ -1,7 +1,7 @@
 tap 'alfr0475/formula'
 tap 'homebrew/bundle'
 tap 'homebrew/dupes'
-tap 'sanemat/font'
+tap 'caskroom/cask'
 cask 'java'
 brew 'android-sdk'
 brew 'android-ndk'
@@ -30,7 +30,6 @@ brew 'vim', args: ['with-lua']
 brew 'wget'
 brew 'alfr0475/formula/emacs-ime-patch', args: ['with-cocoa', 'with-gnutls']
 brew 'homebrew/dupes/apple-gcc42'
-brew 'sanemat/font/ricty', args: ['vim-powerline']
 mas 'Xcode (8.0)', id: 497799835
 mas '1Password (6.3.4)', id: 443987910
 mas 'Wunderlist (3.4.5)', id: 410628904
