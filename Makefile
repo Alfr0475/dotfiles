@@ -21,6 +21,7 @@ deploy:
 	@echo '==> Start to deploy dotfiles to home directory.'
 	@echo ''
 	@$(foreach val, $(DOTFILES), ln -sfnv $(abspath src/$(val)) $(HOME)/$(val);)
+	@ln -sfnv $(DOTPATH)/bin $(HOME)/bin
 
 init:
 	@DOTPATH=$(DOTPATH) bash $(DOTPATH)/etc/init/init.sh
@@ -36,4 +37,5 @@ install: update deploy init
 clean:
 	@echo 'Remove dot files in your home directory...'
 	@-$(foreach val, $(DOTFILES), rm -vrf $(HOME)/$(val);)
+	@rm -vrf $(HOME)/bin
 	-rm -rf $(DOTPATH)
