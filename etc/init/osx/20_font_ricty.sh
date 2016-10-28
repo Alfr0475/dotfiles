@@ -19,6 +19,13 @@ if ! has "brew"; then
     exit
 fi
 
+# formulaがインストール済みなら終了
+if is_brew_tap_install "sanemat/font"; then
+    log_pass "sanemat/font: already installed"
+    exit
+fi
+
+
 # formulaインストール
 brew tap 'sanemat/font'
 
@@ -26,7 +33,7 @@ brew tap 'sanemat/font'
 brew install sanemat/font/ricty --vim-powerline
 
 # フォントをコピーしてキャッシュクリア
-cp -f "$(brew --prefix ricty)"/share/fonts/Ricty*.ttf ~/Library/Fonts/
+cp -f $(brew --prefix ricty)/share/fonts/Ricty*.ttf ~/Library/Fonts/
 fc-cache -vf
 
 log_pass "Ricty font: installed successfully"
