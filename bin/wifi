@@ -15,7 +15,7 @@
 #
 # ▁▂▃▅▇
 
-. "$DOTPATH"/etc/lib/vital.sh
+. "$DOTPATH"/etc/lib/common.sh
 
 if ! is_osx; then
     echo "wifi: require OS X" 1>&2
