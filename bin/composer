@@ -1,0 +1,37 @@
+#!/bin/sh
+
+. "$DOTPATH"/etc/lib/common.sh
+
+if ! has "composer.phar"; then
+    log_fail "not install composer.phar to loaded path"
+    exit 1
+fi
+
+if has "php"; then
+    composer_bin="$(which composer.phar)"
+    exec_status=0
+
+    if has "phpenv"; then
+        xdebug_ini="$(phpenv root)/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini"
+
+        if [ ! -f $xdebug_ini ]; then
+            $composer_bin "$@"
+            exec_status=$?
+        else
+            mv $xdebug_ini ~/xdebug.ini
+            $composer_bin "$@"
+            exec_status=$?
+            mv ~/xdebug.ini $xdebug_ini
+        fi
+    else
+        # phpenv使ってなかったらどうしようか考え中
+        # とりあえずはそのまま実行
+        $composer_bin "$@"
+        exec_status=$?
+    fi
+
+    exit $exec_status
+fi
+
+log_fail "not install php"
+exit 1
