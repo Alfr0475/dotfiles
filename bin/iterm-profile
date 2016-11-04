@@ -1,0 +1,15 @@
+#!/bin/bash
+
+. $DOTPATH/etc/lib/common.sh
+
+if ! is_osx; then
+    log_fail "using operation system is not osx"
+    exit 1
+fi
+
+if [ ! $TERM_PROGRAM = "iTerm.app" ]; then
+    log_fail "using terminal app is not iTerm.app"
+    exit 1
+fi
+
+echo -ne "\033]50;SetProfile="$*"\007"

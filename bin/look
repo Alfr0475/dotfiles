@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# カレントディレクトのファイルをlessで見る
+
+. $DOTPATH/etc/lib/common.sh
+
+if ! has "peco"; then
+    log_fail "peco: not installed"
+    exit 1
+fi
+
+less $(find . -type f -maxdepth 1 | peco)

@@ -1,0 +1,10 @@
+#!/bin/zsh
+
+. $DOTPATH/etc/lib/common.sh
+
+if ! has "zsh"; then
+    log_fail "zsh: not installed"
+    exit 1
+fi
+
+set -o | sed -e 's/^no\(.*\)on$/\1  off/' -e 's/^no\(.*\)off$/\1  on/'
