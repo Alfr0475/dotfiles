@@ -1,0 +1,31 @@
+#!/bin/bash
+
+. $DOTPATH/etc/lib/common.sh
+
+if ! has "tmux"; then
+    log_fail "tmux: not installed"
+    exit 1
+fi
+
+if ! is_tmux_runnning; then
+    log_fail "tmux: not running"
+    exit 1
+fi
+
+case "$1" in
+    "-l" | "--list" )
+        for theme in `ls -1 $HOME/.tmux.d/tmux-powerline/themes`
+        do
+            if [ "`basename $theme .sh`" = "`tmux show-environment -g TMUX_POWERLINE_THEME | sed -e 's/TMUX_POWERLINE_THEME=//'`" ]; then
+                echo "*`basename $theme .sh`"
+            else
+                echo " `basename $theme .sh`"
+            fi
+        done
+        ;;
+    *)
+        if [ -e "$HOME/.tmux.d/tmux-powerline/themes/$1.sh" -o -L "$HOME/.tmux.d/tmux-powerline/themes/$1.sh" ]; then
+            tmux set-environment -g TMUX_POWERLINE_THEME $1
+        fi
+        ;;
+esac

@@ -1,0 +1,6 @@
+#!/bin/zsh
+
+for path_string in $path
+do
+    echo $path_string
+done

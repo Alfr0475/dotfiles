@@ -1,0 +1,17 @@
+#!/bin/bash
+
+. $DOTPATH/etc/lib/common.sh
+
+if is_git_repo; then
+    if is_git_remote upstream; then
+        git checkout develop
+        git pull upstream develop
+        git push origin develop
+    else
+        log_fail "not found remote upstream to current git repository"
+        exit 1
+    fi
+else
+    log_fail "current directory is not git repository"
+    exit 1
+fi

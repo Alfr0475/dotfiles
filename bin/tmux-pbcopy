@@ -1,0 +1,30 @@
+#!/bin/bash
+
+. $DOTPATH/etc/lib/common.sh
+
+if ! has "tmux"; then
+    log_fail "tmux: not installed"
+    exit 1
+fi
+
+if ! is_tmux_runnning; then
+    log_fail "tmux: not running"
+    exit 1
+fi
+
+if ! has "pbcopy"; then
+    tmux display-message "pbcopy: not installed"
+    exit 1
+fi
+
+if ! has "reattach-to-user-namespace"; then
+    tmux display-message "reattach-to-user-namespace: not installed"
+    exit 1
+fi
+
+COPY=`tmux save-buffer -`
+echo "$COPY" | reattach-to-user-namespace pbcopy
+
+# メッセージ表示
+LINES=`echo "$COPY" | wc -l | tr -d ' '`
+tmux display-message "Copy: $LINES lines"

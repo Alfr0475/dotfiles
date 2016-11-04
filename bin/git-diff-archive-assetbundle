@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# ビタコレ専用処理
+# git 差分ファイル取得
+# http://qiita.com/kaminaly/items/28f9cb4e680deb700833
+
+. $DOTPATH/etc/lib/common.sh
+
+if ! is_git_repo; then
+    log_fail "current directory is not git repository"
+    exit 1
+fi
+
+diff=""
+h="HEAD"
+if [ $# -eq 1 ]; then
+    if expr "$1" : '[0-9]*$' > /dev/null; then
+        diff="HEAD~${1} HEAD"
+    else
+        diff="${1} HEAD"
+    fi
+elif [ $# -eq 2 ]; then
+    diff="${1} ${2}"
+    h=$1
+fi
+if [ "$diff" != "" ]; then
+    diff="git diff --diff-filter=MACR --name-only ${diff} AssetBundles/"
+fi
+git archive --format=zip --prefix=root/ $h `eval $diff` -o archive.zip

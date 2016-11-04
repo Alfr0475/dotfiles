@@ -319,6 +319,12 @@ function is_git_repo() {
     return $?
 }
 
+# GITのリモートが存在してるか確認
+function is_git_remote() {
+    git remote show $1 &> /dev/null
+    return $?
+}
+
 # screen起動中
 function is_screen_running() {
     [ ! -z "$STY" ]
