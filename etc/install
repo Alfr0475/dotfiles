@@ -506,8 +506,8 @@ function dotfiles_install() {
 if echo "$-" | grep -q "i"; then
     # インタラクティブモードで読み込まれたらインストール処理は実行しない
     # ライブラリとして機能する
-    NON_INTARACTIVE=1
-    export NON_INTARACTIVE
+    LOADED_COMMON=1
+    export LOADED_COMMON
 
     return
 else
@@ -524,7 +524,7 @@ else
     # -p : 名前付きパイプであれば真
     if [ -n "${BASH_EXECUTION_STRING:-}" ] || [ -p /dev/stdin ]; then
         # 既にインタラクティブモードで読み込まれていたらインストール処理は実行しない
-        if [ "${NON_INTARACTIVE:=0}" = 1 ]; then
+        if [ "${LOADED_COMMON:=0}" = 1 ]; then
             exit
         fi
 
