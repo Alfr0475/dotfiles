@@ -13,3 +13,6 @@
 [submodule "src/.alfred.d"]
 	path = src/.alfred.d
 	url = git@github.com:Alfr0475/alfred.d.git
+[submodule "src/.vim"]
+	path = src/.vim
+	url = git@github.com:Alfr0475/vim.d.git
