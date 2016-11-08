@@ -16,3 +16,6 @@
 [submodule "src/.vim"]
 	path = src/.vim
 	url = git@github.com:Alfr0475/vim.d.git
+[submodule "src/.bash.d"]
+	path = src/.bash.d
+	url = git@github.com:Alfr0475/bash.d.git
