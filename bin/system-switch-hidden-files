@@ -1,0 +1,20 @@
+#!/bin/bash
+
+. $DOTPATH/etc/lib/common.sh
+
+if is_osx; then
+    defaults_status=`defaults read com.apple.finder AppleShowAllFiles 2>/dev/null`
+    if [ $? -ne 0 ] || [ "$defaults_status" = 'FALSE' ]; then
+        defaults write com.apple.finder AppleShowAllFiles TRUE
+        killall Finder
+        log_info "enable view hidden files"
+    else
+        defaults write com.apple.finder AppleShowAllFiles FALSE
+        killall Finder
+        log_info "disable view hidden files"
+    fi
+elif is_linux; then
+    :
+else
+    :
+fi
