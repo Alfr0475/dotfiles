@@ -1,0 +1,10 @@
+#!/bin/bash
+
+. $DOTPATH/etc/lib/common.sh
+
+if ! is_git_repo; then
+    log_fail "Not a git repository"
+    exit 1
+fi
+
+git rev-parse --show-toplevel
