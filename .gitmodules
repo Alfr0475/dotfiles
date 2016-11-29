@@ -19,3 +19,6 @@
 [submodule "src/.bash.d"]
 	path = src/.bash.d
 	url = git@github.com:Alfr0475/bash.d.git
+[submodule "src/.tmuxinator"]
+	path = src/.tmuxinator
+	url = git@github.com:Alfr0475/tmuxinator.d.git
