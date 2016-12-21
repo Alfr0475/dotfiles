@@ -517,6 +517,11 @@ if echo "$-" | grep -q "i"; then
 
     return
 else
+    # bash以外の起動を認めない
+    if ! is_bash; then
+        return
+    fi
+
     # bash a.sh の形を無視する
     if [ "$0" = "${BASH_SOURCE}" ]; then
         exit
