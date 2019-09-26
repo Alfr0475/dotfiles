@@ -14,6 +14,7 @@
 	trustExitCode = true
 [http]
 	sslVerify = false
+	postBuffer = 2147483648
 [user]
 	name = Seiki koga
 	email = alfr0475@gmail.com
