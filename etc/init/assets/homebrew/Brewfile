@@ -2,12 +2,9 @@ tap 'alfr0475/formula'
 tap 'homebrew/bundle'
 tap 'homebrew/dupes'
 tap 'caskroom/cask'
-tap 'caskroom/versions'
 tap 'homebrew/services'
+tap 'sanemat/font'
 cask 'java'
-cask 'java7'
-#brew 'android-sdk'
-#brew 'android-ndk'
 brew 'awscli'
 brew 'nkf'
 brew 'cmigemo'
@@ -34,10 +31,3 @@ brew 'vim', args: ['with-lua']
 brew 'wget'
 brew 'libxml2'
 brew 'libmcrypt'
-brew 'alfr0475/formula/emacs-ime-patch', args: ['with-cocoa', 'with-gnutls']
-#brew 'homebrew/dupes/apple-gcc42'
-mas 'Xcode (8.0)', id: 497799835
-mas '1Password (6.3.4)', id: 443987910
-mas 'Wunderlist (3.4.5)', id: 410628904
-mas 'LINE (4.9.0)', id: 539883307
-mas 'MindNode (2.4.2)', id: 992076693
