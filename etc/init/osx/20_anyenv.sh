@@ -13,8 +13,8 @@ if has "anyenv"; then
 fi
 
 if [ -e "${HOME}/.anyenv" ]; then
-    log_fail "${HOME}/.anyenv: already exists"
-    exit 1
+    log_pass "${HOME}/.anyenv: already exists"
+    exit
 fi
 
 git clone https://github.com/riywo/anyenv "${HOME}"/.anyenv
