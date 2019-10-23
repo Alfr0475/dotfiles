@@ -6,6 +6,7 @@
 	excludesfile = /Users/skoga/.gitignore
 	attributesfile = ~/.gitattribute
 	autocrlf = input
+	filemode = false
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
 	path = 
