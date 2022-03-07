@@ -21,8 +21,3 @@
 	email = alfr0475@gmail.com
 [alias]
 	st = status --short --branch
-[filter "lfs"]
-	required = true
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
