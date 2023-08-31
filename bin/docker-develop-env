@@ -1,0 +1,10 @@
+#!/bin/sh
+
+. $DOTPATH/etc/lib/common.sh
+
+if ! has "docker"; then
+    log_fail "docker: not installed"
+    exit 1
+fi
+
+docker exec -it --user 1000 docker-develop-env-base-1 bash
