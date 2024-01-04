@@ -7,4 +7,4 @@ if ! has "docker"; then
     exit 1
 fi
 
-docker exec -it --user 1000 docker-develop-env-base-1 bash
+docker exec -it --user 501 docker-develop-env-base-1 bash
