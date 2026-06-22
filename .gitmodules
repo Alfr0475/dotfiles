@@ -22,3 +22,6 @@
 [submodule "src/.tmuxinator"]
 	path = src/.tmuxinator
 	url = git@github.com:Alfr0475/tmuxinator.d.git
+[submodule "src/.claude"]
+	path = src/.claude
+	url = git@github.com:Alfr0475/claude.d.git
