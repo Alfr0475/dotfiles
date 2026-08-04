@@ -17,7 +17,7 @@ SCRIPTS       := $(DOTFILES_ROOT)/scripts
 .DEFAULT_GOAL := install
 
 .PHONY: install
-install: deploy brew mise ## 一括セットアップ（deploy -> brew -> mise）
+install: deploy brew mise vim-plugins ## 一括セットアップ（deploy -> brew -> mise -> vim-plugins）
 	@printf '\n\033[1;32m==> 完了しました。新しいシェルを開いてください（exec $$SHELL）\033[0m\n'
 
 .PHONY: deploy
@@ -40,6 +40,10 @@ brew: ## Homebrew を ~/.homebrew に導入し etc/Brewfile を反映する
 mise: ## mise を導入し src/mise/config.toml のツールを入れる
 	@bash $(SCRIPTS)/mise.sh
 
+.PHONY: vim-plugins
+vim-plugins: ## etc/vim-plugins.txt の vim プラグインを ~/.vim/pack に導入する
+	@bash $(SCRIPTS)/vim-plugins.sh
+
 .PHONY: doctor
 doctor: ## 環境が整っているか確認する（何も変更しない）
 	@bash $(SCRIPTS)/doctor.sh
@@ -55,6 +59,7 @@ upgrade: ## brew / mise のパッケージを新しいバージョンに上げ�
 	@$(HOME)/.homebrew/bin/brew upgrade
 	@$(HOME)/.homebrew/bin/brew bundle install --file=$(DOTFILES_ROOT)/etc/Brewfile
 	@$(HOME)/.local/bin/mise upgrade
+	@bash $(SCRIPTS)/vim-plugins.sh --update
 
 .PHONY: brewfile-dump
 brewfile-dump: ## 現在の brew の状態を etc/Brewfile に書き出す（コメントは失われる）

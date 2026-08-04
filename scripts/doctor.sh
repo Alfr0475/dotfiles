@@ -90,6 +90,35 @@ else
 fi
 
 #------------------------------------------------------------------------------
+log_header "iTerm2"
+#------------------------------------------------------------------------------
+# iTerm2 は設定をシンボリックリンクでは追えず、アプリ側の
+# PrefsCustomFolder にフォルダのパスを持つ。make では変更できないので
+# 切り替え漏れをここで検出する。
+ITERM2_DIR="$SRC_DIR/iterm2"
+if [ ! -d "/Applications/iTerm.app" ]; then
+  log_skip "iTerm2 が未インストール"
+elif ! has defaults; then
+  log_skip "defaults コマンドが無い"
+else
+  iterm_folder="$(defaults read com.googlecode.iterm2 PrefsCustomFolder 2>/dev/null || true)"
+  iterm_load="$(defaults read com.googlecode.iterm2 LoadPrefsFromCustomFolder 2>/dev/null || true)"
+
+  if [ "$iterm_folder" = "$ITERM2_DIR" ] && [ "$iterm_load" = "1" ]; then
+    log_ok "設定フォルダ = $(tilde "$ITERM2_DIR")"
+  elif [ -z "$iterm_folder" ]; then
+    log_warn "カスタム設定フォルダが未設定（このリポジトリの設定が使われていない）"
+    log_info "        iTerm2 > Settings > General > Settings で次を指定する:"
+    log_info "        $ITERM2_DIR"
+    note_problem
+  else
+    log_fail "設定フォルダが別の場所を指している: $iterm_folder"
+    log_info "        想定: $ITERM2_DIR"
+    note_problem
+  fi
+fi
+
+#------------------------------------------------------------------------------
 log_header "Homebrew"
 #------------------------------------------------------------------------------
 if [ ! -x "$BREW_BIN" ]; then

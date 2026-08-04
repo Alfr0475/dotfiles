@@ -123,8 +123,12 @@ make help          ターゲット一覧
 
 ### 新しい Mac で必要な手作業
 
-`~/.gitconfig.local` だけは `make` では作られないので、テンプレートからコピーして
-git のユーザー名とメールアドレスを設定する。
+`make` で完結しないものが 2 つある。どちらも `make doctor` が未対応を検出する。
+
+**1. git のユーザー設定**
+
+`~/.gitconfig.local` はマシン固有なのでリポジトリに入っていない。
+テンプレートからコピーして値を埋める。
 
 ```sh
 cp ~/work/dotfiles/src/git/config.local.example ~/.gitconfig.local
@@ -134,6 +138,25 @@ git config --show-origin --get user.email   # 反映確認
 
 設定しないと git がホスト名から推測した無効なアドレスでコミットしてしまい、
 それが履歴に永久に残る（GitHub 上でもアカウントに紐付かない）。
+
+**2. iTerm2 の設定フォルダ**
+
+iTerm2 の設定はシンボリックリンクでは追えず、アプリ側にフォルダのパスを
+持たせる方式になっている。
+
+iTerm2 を終了した状態で次を実行する。
+
+```sh
+defaults write com.googlecode.iterm2 PrefsCustomFolder -string ~/work/dotfiles/src/iterm2
+defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true
+```
+
+GUI から設定する場合は `iTerm2 > Settings > General > Settings` の
+"Load settings from a custom folder or URL" に上記パスを指定する。
+
+> iTerm2 は設定変更時にこのフォルダへ書き戻すため、iTerm2 を触ると
+> `src/iterm2/com.googlecode.iterm2.plist` に差分が出る。設定を残したい場合は
+> そのままコミットすればよい。
 
 ## 旧環境からの移行メモ
 
