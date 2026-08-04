@@ -17,7 +17,7 @@ SCRIPTS       := $(DOTFILES_ROOT)/scripts
 .DEFAULT_GOAL := install
 
 .PHONY: install
-install: deploy brew mise vim-plugins claude ## 一括セットアップ（deploy -> brew -> mise -> vim-plugins -> claude）
+install: deploy brew mise vim-plugins claude iterm2 ## 一括セットアップ（deploy -> brew -> mise -> vim-plugins -> claude -> iterm2）
 	@printf '\n\033[1;32m==> 完了しました。新しいシェルを開いてください（exec $$SHELL）\033[0m\n'
 
 .PHONY: deploy
@@ -47,6 +47,18 @@ vim-plugins: ## etc/vim-plugins.txt の vim プラグインを ~/.vim/pack に�
 .PHONY: claude
 claude: ## Claude Code の設定を ~/.claude に配置する
 	@bash $(SCRIPTS)/claude-install.sh --no-cli
+
+.PHONY: iterm2
+iterm2: ## iTerm2 の設定が無ければリポジトリから復元する（既存は変更しない）
+	@bash $(SCRIPTS)/iterm2.sh
+
+.PHONY: iterm2-save
+iterm2-save: ## iTerm2 の設定変更をリポジトリに取り込む
+	@bash $(SCRIPTS)/iterm2.sh --save
+
+.PHONY: iterm2-load
+iterm2-load: ## リポジトリの iTerm2 設定を ~/.config/iterm2 に復元する
+	@bash $(SCRIPTS)/iterm2.sh --load
 
 .PHONY: doctor
 doctor: ## 環境が整っているか確認する（何も変更しない）

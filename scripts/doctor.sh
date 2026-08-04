@@ -137,7 +137,11 @@ log_header "iTerm2"
 # iTerm2 は設定をシンボリックリンクでは追えず、アプリ側の
 # PrefsCustomFolder にフォルダのパスを持つ。make では変更できないので
 # 切り替え漏れをここで検出する。
-ITERM2_DIR="$SRC_DIR/iterm2"
+#
+# 本番の場所は ~/.config/iterm2 で、リポジトリはその複製を持つ。
+# iTerm2 が書き戻すため乖離しうるので、差分も検出する。
+ITERM2_LIVE="$HOME/.config/iterm2"
+ITERM2_PLIST="com.googlecode.iterm2.plist"
 if [ ! -d "/Applications/iTerm.app" ]; then
   log_skip "iTerm2 が未インストール"
 elif ! has defaults; then
@@ -146,16 +150,35 @@ else
   iterm_folder="$(defaults read com.googlecode.iterm2 PrefsCustomFolder 2>/dev/null || true)"
   iterm_load="$(defaults read com.googlecode.iterm2 LoadPrefsFromCustomFolder 2>/dev/null || true)"
 
-  if [ "$iterm_folder" = "$ITERM2_DIR" ] && [ "$iterm_load" = "1" ]; then
-    log_ok "設定フォルダ = $(tilde "$ITERM2_DIR")"
-  elif [ -z "$iterm_folder" ]; then
-    log_warn "カスタム設定フォルダが未設定（このリポジトリの設定が使われていない）"
+  if [ -z "$iterm_folder" ]; then
+    log_fail "カスタム設定フォルダが未設定（リポジトリの設定が使われていない）"
     log_info "        iTerm2 > Settings > General > Settings で次を指定する:"
-    log_info "        $ITERM2_DIR"
+    log_info "        $ITERM2_LIVE"
+    note_problem
+  elif [ "$iterm_folder" != "$ITERM2_LIVE" ]; then
+    log_fail "設定フォルダが別の場所を指している: $iterm_folder"
+    log_info "        想定: $ITERM2_LIVE"
+    note_problem
+  elif [ "$iterm_load" != "1" ]; then
+    log_fail "設定フォルダの読み込みが無効（LoadPrefsFromCustomFolder=$iterm_load）"
     note_problem
   else
-    log_fail "設定フォルダが別の場所を指している: $iterm_folder"
-    log_info "        想定: $ITERM2_DIR"
+    log_ok "設定フォルダ = $(tilde "$ITERM2_LIVE")"
+  fi
+
+  # リポジトリの複製と実際の設定が乖離していないか
+  live_plist="$ITERM2_LIVE/$ITERM2_PLIST"
+  repo_plist="$SRC_DIR/iterm2/$ITERM2_PLIST"
+  if [ ! -f "$live_plist" ]; then
+    log_warn "$(tilde "$live_plist") が無い -> make iterm2-load"
+    note_problem
+  elif [ ! -f "$repo_plist" ]; then
+    log_warn "$(tilde "$repo_plist") が無い -> make iterm2-save"
+    note_problem
+  elif cmp -s "$live_plist" "$repo_plist"; then
+    log_ok "リポジトリの複製と一致"
+  else
+    log_warn "リポジトリの複製と差分がある（設定変更が未コミット）-> make iterm2-save"
     note_problem
   fi
 fi

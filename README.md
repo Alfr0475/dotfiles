@@ -73,6 +73,9 @@ make               install と同じ
 make install       deploy -> brew -> mise -> vim-plugins -> claude を順に実行する
 make vim-plugins   etc/vim-plugins.txt の vim プラグインを ~/.vim/pack に導入する
 make claude        Claude Code の設定を ~/.claude に配置する
+make iterm2        iTerm2 の設定が無ければリポジトリから復元する
+make iterm2-save   iTerm2 の設定変更をリポジトリに取り込む
+make iterm2-load   リポジトリの iTerm2 設定を ~/.config/iterm2 に復元する
 make deploy        etc/links.conf に従ってシンボリックリンクを配置する
 make check         deploy で何が起きるかを表示するだけ（変更しない）
 make unlink        このリポジトリが張ったリンクだけを削除する
@@ -144,21 +147,39 @@ git config --show-origin --get user.email   # 反映確認
 **2. iTerm2 の設定フォルダ**
 
 iTerm2 の設定はシンボリックリンクでは追えず、アプリ側にフォルダのパスを
-持たせる方式になっている。
+持たせる方式になっている。`make` では変更できないので手で指定する。
 
-iTerm2 を終了した状態で次を実行する。
+`iTerm2 > Settings > General > Settings` の
+"Load settings from a custom folder or URL" に次を指定する。
+
+```
+~/.config/iterm2
+```
+
+CLI からやる場合は iTerm2 を終了した状態で次を実行する。
 
 ```sh
-defaults write com.googlecode.iterm2 PrefsCustomFolder -string ~/work/dotfiles/src/iterm2
+defaults write com.googlecode.iterm2 PrefsCustomFolder -string ~/.config/iterm2
 defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true
 ```
 
-GUI から設定する場合は `iTerm2 > Settings > General > Settings` の
-"Load settings from a custom folder or URL" に上記パスを指定する。
+plist 本体は `make install`（`make iterm2`）がリポジトリから復元する。
 
-> iTerm2 は設定変更時にこのフォルダへ書き戻すため、iTerm2 を触ると
-> `src/iterm2/com.googlecode.iterm2.plist` に差分が出る。設定を残したい場合は
-> そのままコミットすればよい。
+### iTerm2 の設定を更新したとき
+
+本番の場所は `~/.config/iterm2` で、リポジトリ（`src/iterm2/`）はその複製を持つ。
+plist をシンボリックリンクにしていないのは、plist の書き込みが一時ファイル +
+rename で行われることが多く、リンクが実ファイルに置き換わって静かに切れるため。
+
+そのため iTerm2 で設定を変えたら取り込む操作が必要になる。
+
+```sh
+make iterm2-save    # ~/.config/iterm2 -> リポジトリ（変更を取り込む）
+make iterm2-load    # リポジトリ -> ~/.config/iterm2（設定を戻す）
+```
+
+取り込み忘れは `make doctor` が検出する。`make iterm2` は既存の設定を勝手に
+上書きせず、plist が無いときだけ復元する（どちらが新しいかは自動判断しない）。
 
 ## Claude Code の設定
 
