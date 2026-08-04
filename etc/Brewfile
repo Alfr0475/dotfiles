@@ -1,0 +1,39 @@
+# Homebrew の担当分  ->  make brew
+#
+# 方針: 言語ランタイムと CLI ツールは mise (src/mise/config.toml) で管理し、
+#       ここには mise で賄えないものだけを書く。
+#         - GUI アプリ (cask)
+#         - フォント (cask)
+#         - mise に plugin が無い CLI
+#         - 他の formula がリンクするライブラリ類
+#
+# 現状を書き出す:  make brewfile-dump   (etc/Brewfile を上書きする)
+# 反映:            make brew
+#
+# 注意: prefix が ~/.homebrew (非標準) なので配布ビルド(bottle)が使えず、
+#       ソースからのビルドになる formula がある。重いものは mise 側を検討する。
+
+#------------------------------------------------------------------------------
+# CLI (mise で賄えないもの)
+#------------------------------------------------------------------------------
+brew "tmux"                          # ターミナルマルチプレクサ
+brew "reattach-to-user-namespace"    # tmux から macOS のクリップボードを触るため
+brew "tig"                           # git の TUI
+brew "rmtrash"                       # ゴミ箱送りの削除（rm 互換のオプションを取る）
+brew "dfc"                           # df の代替
+brew "coreutils"                     # GNU coreutils (macOS のコマンドは古い)
+brew "source-highlight"              # source-highlight (ソースコードのシンタックスハイライト)
+brew "lesspipe"                      # lesspipe (less の前処理)
+
+#------------------------------------------------------------------------------
+# GUI / フォント
+#------------------------------------------------------------------------------
+cask "font-hackgen"                  # 日本語対応の等幅フォント
+cask "claude-code"
+
+#------------------------------------------------------------------------------
+# VSCode 拡張
+#------------------------------------------------------------------------------
+vscode "alefragnani.project-manager"
+vscode "anthropic.claude-code"
+vscode "ms-ceintl.vscode-language-pack-ja"

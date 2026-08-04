@@ -1,0 +1,36 @@
+# mise グローバル設定  ->  ~/.config/mise/config.toml
+#
+# 言語ランタイムと CLI ツールはここで管理する。
+# プロジェクト固有のバージョンは各リポジトリの mise.toml / .tool-versions で上書きされる。
+#
+#   mise ls-remote node     利用可能なバージョンを見る
+#   mise use -g node@22     ここに追記しつつインストールする
+#   mise install            このファイルの内容を反映する
+
+[tools]
+# ---- 言語ランタイム ----
+# node = "22"
+# python = "3.12"
+# ruby = "3.3"
+# go = "latest"
+
+# ---- CLI ツール ----
+# mise 管理下に置けるものはこちらに寄せる（Homebrew を使わない）
+# ripgrep = "latest"
+# fd = "latest"
+# jq = "latest"
+# fzf = "latest"
+# lazygit = "latest"
+peco = "latest"
+ghq = "latest"
+
+[settings]
+# .tool-versions / mise.toml を自動で信頼しない（意図しないツール実行を防ぐ）
+# 必要になったら該当ディレクトリで `mise trust` する
+paranoid = false
+
+# ビルドが必要な場合の並列度
+jobs = 4
+
+# 未インストールのツールを自動で入れない（make 経由で明示的に入れる）
+not_found_auto_install = false
