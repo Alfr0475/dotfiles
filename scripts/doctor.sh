@@ -90,6 +90,48 @@ else
 fi
 
 #------------------------------------------------------------------------------
+log_header "Claude Code"
+#------------------------------------------------------------------------------
+# ~/.claude は Claude Code 自身が会話ログを書き込むため、ディレクトリ全体は
+# リンクにせず中身を個別にリンクしている（make claude / claude-install.sh）。
+CLAUDE_SRC="$SRC_DIR/claude"
+if [ -L "$HOME/.claude" ]; then
+  log_fail "~/.claude がシンボリックリンク -> $(readlink "$HOME/.claude")"
+  log_info "        リンク先を書き換えてしまうため配置できません:"
+  log_info "        rm ~/.claude && mkdir -p ~/.claude && make claude"
+  note_problem
+else
+  for item in CLAUDE.md settings.json skills; do
+    src="$CLAUDE_SRC/$item"
+    dest="$HOME/.claude/$item"
+    [ -e "$src" ] || continue
+
+    if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$src" ]; then
+      log_ok "~/.claude/$item"
+    elif [ -e "$dest" ]; then
+      log_fail "~/.claude/$item がこのリポジトリを指していない -> make claude"
+      note_problem
+    else
+      log_fail "~/.claude/$item が未配置 -> make claude"
+      note_problem
+    fi
+  done
+
+  # settings.json が壊れていると Claude Code が設定を読めない。
+  # plutil -lint は plist 形式を期待して JSON を弾くので使えない
+  # （正しい JSON でも "Unexpected character {" になる）。
+  # -convert なら JSON を解釈できるので、変換の成否で判定する。
+  if [ -e "$CLAUDE_SRC/settings.json" ] && has plutil; then
+    if plutil -convert json -o /dev/null "$CLAUDE_SRC/settings.json" >/dev/null 2>&1; then
+      log_ok "src/claude/settings.json は妥当な JSON"
+    else
+      log_fail "src/claude/settings.json が JSON として不正"
+      note_problem
+    fi
+  fi
+fi
+
+#------------------------------------------------------------------------------
 log_header "iTerm2"
 #------------------------------------------------------------------------------
 # iTerm2 は設定をシンボリックリンクでは追えず、アプリ側の

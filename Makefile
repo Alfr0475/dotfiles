@@ -17,7 +17,7 @@ SCRIPTS       := $(DOTFILES_ROOT)/scripts
 .DEFAULT_GOAL := install
 
 .PHONY: install
-install: deploy brew mise vim-plugins ## 一括セットアップ（deploy -> brew -> mise -> vim-plugins）
+install: deploy brew mise vim-plugins claude ## 一括セットアップ（deploy -> brew -> mise -> vim-plugins -> claude）
 	@printf '\n\033[1;32m==> 完了しました。新しいシェルを開いてください（exec $$SHELL）\033[0m\n'
 
 .PHONY: deploy
@@ -43,6 +43,10 @@ mise: ## mise を導入し src/mise/config.toml のツールを入れる
 .PHONY: vim-plugins
 vim-plugins: ## etc/vim-plugins.txt の vim プラグインを ~/.vim/pack に導入する
 	@bash $(SCRIPTS)/vim-plugins.sh
+
+.PHONY: claude
+claude: ## Claude Code の設定を ~/.claude に配置する
+	@bash $(SCRIPTS)/claude-install.sh --no-cli
 
 .PHONY: doctor
 doctor: ## 環境が整っているか確認する（何も変更しない）

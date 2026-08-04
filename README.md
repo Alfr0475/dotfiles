@@ -70,7 +70,9 @@ Homebrew はセキュリティ上の都合で標準の `/opt/homebrew` ではな
 
 ```
 make               install と同じ
-make install       deploy -> brew -> mise を順に実行する
+make install       deploy -> brew -> mise -> vim-plugins -> claude を順に実行する
+make vim-plugins   etc/vim-plugins.txt の vim プラグインを ~/.vim/pack に導入する
+make claude        Claude Code の設定を ~/.claude に配置する
 make deploy        etc/links.conf に従ってシンボリックリンクを配置する
 make check         deploy で何が起きるかを表示するだけ（変更しない）
 make unlink        このリポジトリが張ったリンクだけを削除する
@@ -169,14 +171,11 @@ GUI から設定する場合は `iTerm2 > Settings > General > Settings` の
 | `skills/` | 自作スキル（`join-project`, `promote-product`） |
 
 `~/.claude` は Claude Code 自身が会話ログやセッション状態を書き込むため、
-ディレクトリ全体はリンクにせず中身を個別にリンクする。`make` からは呼ばれない
-（実環境への適用は明示的に行う）。
-
-```sh
-./scripts/claude-install.sh
-```
-
+ディレクトリ全体はリンクにせず中身を個別にリンクする（`make claude`）。
 会話ログ（`projects/`）や認証情報（`.credentials.json`）は配置対象に含めない。
+
+macOS では claude CLI を Homebrew（`cask "claude-code"`）で入れるため、
+`make claude` は `--no-cli` を付けて npm による二重導入を避けている。
 
 ### Dev Container で使う
 
