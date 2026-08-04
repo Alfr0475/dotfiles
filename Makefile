@@ -17,7 +17,7 @@ SCRIPTS       := $(DOTFILES_ROOT)/scripts
 .DEFAULT_GOAL := install
 
 .PHONY: install
-install: deploy brew mise vim-plugins claude iterm2 ## 一括セットアップ（deploy -> brew -> mise -> vim-plugins -> claude -> iterm2）
+install: deploy brew mise vim-plugins tmux-plugins claude iterm2 ## 一括セットアップ（deploy -> brew -> mise -> プラグイン -> claude -> iterm2）
 	@printf '\n\033[1;32m==> 完了しました。新しいシェルを開いてください（exec $$SHELL）\033[0m\n'
 
 .PHONY: deploy
@@ -43,6 +43,10 @@ mise: ## mise を導入し src/mise/config.toml のツールを入れる
 .PHONY: vim-plugins
 vim-plugins: ## etc/vim-plugins.txt の vim プラグインを ~/.vim/pack に導入する
 	@bash $(SCRIPTS)/vim-plugins.sh
+
+.PHONY: tmux-plugins
+tmux-plugins: ## etc/tmux-plugins.txt の tmux プラグインを ~/.tmux/plugins に導入する
+	@bash $(SCRIPTS)/tmux-plugins.sh
 
 .PHONY: claude
 claude: ## Claude Code の設定を ~/.claude に配置する
@@ -76,6 +80,7 @@ upgrade: ## brew / mise のパッケージを新しいバージョンに上げ�
 	@$(HOME)/.homebrew/bin/brew bundle install --file=$(DOTFILES_ROOT)/etc/Brewfile
 	@$(HOME)/.local/bin/mise upgrade
 	@bash $(SCRIPTS)/vim-plugins.sh --update
+	@bash $(SCRIPTS)/tmux-plugins.sh --update
 
 .PHONY: brewfile-dump
 brewfile-dump: ## 現在の brew の状態を etc/Brewfile に書き出す（コメントは失われる）

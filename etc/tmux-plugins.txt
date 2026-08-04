@@ -1,0 +1,10 @@
+# tmux プラグインの一覧  ->  make tmux-plugins
+#
+#   <配置名>  <git URL>
+#
+# ~/.tmux/plugins/<配置名> に clone される（リポジトリ管理外）。
+# 設定は src/ 側で管理し、本体はホーム側に置く方針は vim と同じ。
+#
+# 空行と `#` 始まりの行は無視される。
+
+tmux-powerline           https://github.com/erikw/tmux-powerline.git

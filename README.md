@@ -72,6 +72,7 @@ Homebrew はセキュリティ上の都合で標準の `/opt/homebrew` ではな
 make               install と同じ
 make install       deploy -> brew -> mise -> vim-plugins -> claude を順に実行する
 make vim-plugins   etc/vim-plugins.txt の vim プラグインを ~/.vim/pack に導入する
+make tmux-plugins  etc/tmux-plugins.txt の tmux プラグインを ~/.tmux/plugins に導入する
 make claude        Claude Code の設定を ~/.claude に配置する
 make iterm2        iTerm2 の設定が無ければリポジトリから復元する
 make iterm2-save   iTerm2 の設定変更をリポジトリに取り込む
@@ -180,6 +181,28 @@ make iterm2-load    # リポジトリ -> ~/.config/iterm2（設定を戻す）
 
 取り込み忘れは `make doctor` が検出する。`make iterm2` は既存の設定を勝手に
 上書きせず、plist が無いときだけ復元する（どちらが新しいかは自動判断しない）。
+
+## tmux のステータスライン（tmux-powerline）
+
+| 置き場 | 内容 |
+| --- | --- |
+| `~/.tmux/plugins/tmux-powerline` | 本体。`make tmux-plugins` で clone（リポジトリ外） |
+| `src/tmux/powerline-config.sh` | 設定 → `~/.config/tmux-powerline/config.sh` |
+| `src/tmux/powerline-themes/note.sh` | カスタムテーマ → `~/.config/tmux-powerline/themes/` |
+
+現行の tmux-powerline は設定を `$XDG_CONFIG_HOME/tmux-powerline/` 配下しか
+読まない。旧環境の `~/.tmux-powerlinerc` に置くと**黙って無視され**、
+カスタムテーマも見つからずステータスラインが空になる。
+
+セパレータの字形（U+E0B0 等）にはパッチ済みフォントが必要なので
+`font-hackgen-nerd` を Brewfile に入れている。`ifstat` と `tmux-mem-cpu-load` は
+テーマが使うセグメントの依存。
+
+`make doctor` が本体・設定・テーマ・依存コマンド・フォントを個別に検証する。
+
+> iTerm2 のプロファイルは `HackGenConsoleForPowerline-Regular` を指定しているが、
+> HackGen 側で命名が変わり現在の後継は `HackGenConsoleNF-Regular`。
+> セパレータが豆腐になる場合はプロファイルのフォントを差し替える。
 
 ## Claude Code の設定
 

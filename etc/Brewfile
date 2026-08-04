@@ -18,6 +18,8 @@
 #------------------------------------------------------------------------------
 brew "tmux"                          # ターミナルマルチプレクサ
 brew "reattach-to-user-namespace"    # tmux から macOS のクリップボードを触るため
+brew "tmux-mem-cpu-load"             # tmux-powerline の tmux_mem_cpu_load セグメント用
+brew "ifstat"                        # tmux-powerline の ifstat セグメント用
 brew "tig"                           # git の TUI
 brew "git-lfs"                       # Git LFS（.gitconfig の filter "lfs" が要求する）
 brew "rmtrash"                       # ゴミ箱送りの削除（rm 互換のオプションを取る）
@@ -30,6 +32,10 @@ brew "lesspipe"                      # lesspipe (less の前処理)
 # GUI / フォント
 #------------------------------------------------------------------------------
 cask "font-hackgen"                  # 日本語対応の等幅フォント
+# tmux-powerline のセパレータ字形(U+E0B0 等)に必要。
+# 旧環境の iTerm2 は HackGenConsoleForPowerline を指定していたが、
+# HackGen 側で命名が変わり現在は HackGenConsoleNF が後継。
+cask "font-hackgen-nerd"             # powerline / Nerd Font 字形入りの HackGen
 cask "claude-code"
 
 #------------------------------------------------------------------------------

@@ -90,6 +90,64 @@ else
 fi
 
 #------------------------------------------------------------------------------
+log_header "tmux-powerline"
+#------------------------------------------------------------------------------
+PL_DIR="$HOME/.tmux/plugins/tmux-powerline"
+if [ ! -x "$PL_DIR/powerline.sh" ]; then
+  log_fail "$(tilde "$PL_DIR") が無い -> make tmux-plugins"
+  note_problem
+else
+  log_ok "本体あり"
+
+  # 設定は $XDG_CONFIG_HOME/tmux-powerline/ 配下しか読まれない。
+  # 旧環境の ~/.tmux-powerlinerc に置くと黙って無視される。
+  pl_conf="${XDG_CONFIG_HOME:-$HOME/.config}/tmux-powerline/config.sh"
+  if [ -e "$pl_conf" ]; then
+    log_ok "$(tilde "$pl_conf")"
+  else
+    log_fail "$(tilde "$pl_conf") が無い -> make deploy"
+    note_problem
+  fi
+
+  if [ -e "$HOME/.tmux-powerlinerc" ]; then
+    log_warn "~/.tmux-powerlinerc は現行版では読まれません（削除して構いません）"
+  fi
+
+  # テーマが解決できるか
+  pl_theme="$(grep -oE '^[[:space:]]*export TMUX_POWERLINE_THEME=.*' "$pl_conf" 2>/dev/null \
+    | tail -1 | /usr/bin/sed -e 's/.*=//' -e 's/"//g' -e "s/'//g" | tr -d ' ')"
+  if [ -n "$pl_theme" ]; then
+    if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/tmux-powerline/themes/$pl_theme.sh" ] \
+      || [ -f "$PL_DIR/themes/$pl_theme.sh" ]; then
+      log_ok "テーマ $pl_theme"
+    else
+      log_fail "テーマ $pl_theme が見つからない"
+      note_problem
+    fi
+  fi
+
+  # テーマが要求する外部コマンド
+  for c in tmux-mem-cpu-load ifstat; do
+    if has "$c"; then
+      log_ok "$c"
+    else
+      log_warn "$c が無い（該当セグメントが空になる）-> make brew"
+      note_problem
+    fi
+  done
+
+  # パッチ済みフォント（セパレータ字形 U+E0B0 等）
+  if grep -qE 'PATCHED_FONT_IN_USE="?true' "$pl_conf" 2>/dev/null; then
+    if ls "$HOME/Library/Fonts/" 2>/dev/null | grep -qiE 'NF-|Nerd|Powerline'; then
+      log_ok "パッチ済みフォントあり"
+    else
+      log_warn "パッチ済みフォントが無い（セパレータが豆腐になる）-> make brew"
+      note_problem
+    fi
+  fi
+fi
+
+#------------------------------------------------------------------------------
 log_header "Claude Code"
 #------------------------------------------------------------------------------
 # ~/.claude は Claude Code 自身が会話ログを書き込むため、ディレクトリ全体は
