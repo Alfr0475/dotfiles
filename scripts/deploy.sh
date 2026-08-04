@@ -29,6 +29,7 @@ done
 [ -f "$LINKS_CONF" ] || die "not found: $LINKS_CONF"
 
 BACKUP_SUFFIX="bak.$(date +%Y%m%d%H%M%S)"
+PROBLEMS=0
 
 run() {
   if [ "$DRY_RUN" -eq 1 ]; then
@@ -37,12 +38,43 @@ run() {
   "$@"
 }
 
+# 配置先の親ディレクトリ階層にシンボリックリンクが含まれていれば、その位置を返す。
+#
+# 含まれていると mkdir -p や ln がリンク先に書き込むため、意図しない場所
+# （例: 旧 dotfiles リポジトリ）の中身を書き換えてしまう。
+# 実際に ~/.vim が旧リポジトリへのリンクだったとき、~/.vim/vimrc の配置で
+# 旧リポジトリ内のファイルを退避・置換してしまったことがある。
+symlinked_ancestor() {
+  local p
+  p="$(dirname "$1")"
+  while [ "$p" != "/" ] && [ "$p" != "." ]; do
+    if [ -L "$p" ]; then
+      printf '%s\n' "$p"
+      return 0
+    fi
+    [ "$p" = "$HOME" ] && break
+    p="$(dirname "$p")"
+  done
+  return 1
+}
+
 link_one() {
   local src="$1" dest="$2"
   local abs_src="$SRC_DIR/$src"
 
   if [ ! -e "$abs_src" ]; then
     log_warn "$(tilde "$dest") <- src/$src が存在しないためスキップ"
+    return 0
+  fi
+
+  # 親がシンボリックリンクならリンク先を書き換えてしまうので配置しない
+  local bad
+  if bad="$(symlinked_ancestor "$dest")"; then
+    log_fail "$(tilde "$dest") の親 $(tilde "$bad") がシンボリックリンクのため配置しません"
+    log_info "        $(tilde "$bad") -> $(readlink "$bad")"
+    log_info "        リンク先の中身を書き換えてしまいます。実ディレクトリにしてから再実行してください:"
+    log_info "        rm $(tilde "$bad") && mkdir -p $(tilde "$bad")"
+    PROBLEMS=$((PROBLEMS + 1))
     return 0
   fi
 
@@ -71,6 +103,12 @@ link_one() {
 unlink_one() {
   local src="$1" dest="$2"
   local abs_src="$SRC_DIR/$src"
+
+  local bad
+  if bad="$(symlinked_ancestor "$dest")"; then
+    log_skip "$(tilde "$dest") (親 $(tilde "$bad") がシンボリックリンク)"
+    return 0
+  fi
 
   if [ ! -L "$dest" ]; then
     log_skip "$(tilde "$dest") (シンボリックリンクではない)"
@@ -112,3 +150,8 @@ while read -r src dest _rest; do
 done < "$LINKS_CONF"
 
 log_info "$count 件を処理しました"
+
+if [ "$PROBLEMS" -gt 0 ]; then
+  log_fail "$PROBLEMS 件を配置できませんでした"
+  exit 1
+fi
