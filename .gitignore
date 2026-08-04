@@ -5,3 +5,24 @@
 
 # このマシン固有の設定（各自の環境に置く。リポジトリには入れない）
 *.local
+
+# Claude Code が実行時に書き込むもの。
+# src/claude/ では設定(CLAUDE.md / settings.json / skills)だけを管理する。
+# 会話ログや認証情報を誤ってコミットしないための保険。
+src/claude/projects/
+src/claude/backups/
+src/claude/file-history/
+src/claude/sessions/
+src/claude/session-env/
+src/claude/shell-snapshots/
+src/claude/ide/
+src/claude/plans/
+src/claude/todos/
+src/claude/statsig/
+src/claude/.last-cleanup
+src/claude/history.jsonl
+src/claude/remote-settings.json
+src/claude/policy-limits.json
+
+# 認証情報はどの階層にあっても除外する
+.credentials.json

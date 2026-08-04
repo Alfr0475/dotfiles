@@ -158,6 +158,38 @@ GUI から設定する場合は `iTerm2 > Settings > General > Settings` の
 > `src/iterm2/com.googlecode.iterm2.plist` に差分が出る。設定を残したい場合は
 > そのままコミットすればよい。
 
+## Claude Code の設定
+
+`src/claude/` に置いている（旧 `Alfr0475/claude.d` から統合）。
+
+| ファイル | 内容 |
+| --- | --- |
+| `CLAUDE.md` | 全プロジェクト共通の行動指針 |
+| `settings.json` | モデルと effort の設定 |
+| `skills/` | 自作スキル（`join-project`, `promote-product`） |
+
+`~/.claude` は Claude Code 自身が会話ログやセッション状態を書き込むため、
+ディレクトリ全体はリンクにせず中身を個別にリンクする。`make` からは呼ばれない
+（実環境への適用は明示的に行う）。
+
+```sh
+./scripts/claude-install.sh
+```
+
+会話ログ（`projects/`）や認証情報（`.credentials.json`）は配置対象に含めない。
+
+### Dev Container で使う
+
+VS Code のユーザー設定に追加すると、コンテナ内でも同じ設定と skills が使える。
+
+```json
+"remote.containers.dotfiles.repository": "https://github.com/koga-s-cr/dotfiles",
+"remote.containers.dotfiles.targetPath": "~/dotfiles",
+"remote.containers.dotfiles.installCommand": "~/dotfiles/scripts/claude-install.sh"
+```
+
+`claude-install.sh` はコンテナ内に claude CLI が無ければ npm / apt / brew で導入を試みる。
+
 ## 旧環境からの移行メモ
 
 旧リポジトリ（`Alfr0475/dotfiles`）はサブモジュール構成（`zsh.d` / `tmux.d` など）
