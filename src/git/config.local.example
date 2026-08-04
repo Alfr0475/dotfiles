@@ -7,7 +7,7 @@
 #
 # 新しい Mac では次のようにコピーして値を埋める:
 #
-#   cp ~/work/dotfiles/src/git/config.local.example ~/.gitconfig.local
+#   cp "$(ghq root)"/github.com/koga-s-cr/dotfiles/src/git/config.local.example ~/.gitconfig.local
 #   $EDITOR ~/.gitconfig.local
 #
 # 設定しないと git がホスト名から推測した無効なアドレス

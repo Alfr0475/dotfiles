@@ -1,8 +1,10 @@
 #------------------------------------------------------------------------------
 # dotfiles
 #
-#   新しい Mac では:
-#     git clone <this repo> ~/work/dotfiles && cd ~/work/dotfiles && make
+#   新しい Mac では ghq の規約に合わせた場所に clone して make する:
+#     git clone git@github.com:koga-s-cr/dotfiles.git \
+#       ~/work/sources/git/github.com/koga-s-cr/dotfiles
+#     cd ~/work/sources/git/github.com/koga-s-cr/dotfiles && make
 #
 #   全てのターゲットは何度実行しても結果が変わらない（冪等）ように作っている。
 #------------------------------------------------------------------------------

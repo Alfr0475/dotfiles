@@ -27,7 +27,7 @@ alias ...='cd ../..'
 (( $+commands[dfc] )) && alias df='dfc'
 
 # dotfiles リポジトリへ移動する
-alias dot='cd "$HOME/work/dotfiles"'
+alias dot='cd "$(ghq root)/github.com/koga-s-cr/dotfiles"'
 
 # peco
 if which peco > /dev/null; then

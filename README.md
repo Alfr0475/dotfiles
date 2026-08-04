@@ -5,11 +5,22 @@
 新しい Mac では clone して `make` するだけで環境が揃う。すべてのターゲットは
 何度実行しても同じ結果になる（冪等）ように作っている。
 
+このリポジトリは ghq 管理下（`$(ghq root)/github.com/koga-s-cr/dotfiles`）に置く。
+
 ```sh
-git clone <this repo> ~/work/dotfiles
-cd ~/work/dotfiles
+# ghq が無い初回は git clone でよい（配置先は ghq の規約に合わせる）
+git clone git@github.com:koga-s-cr/dotfiles.git \
+  ~/work/sources/git/github.com/koga-s-cr/dotfiles
+cd ~/work/sources/git/github.com/koga-s-cr/dotfiles
 make
 exec $SHELL -l
+```
+
+`make` 後は ghq と peco が入るので、2 回目以降は次で移動できる。
+
+```sh
+dot     # このリポジトリへ cd
+pg      # ghq 管理下のリポジトリを peco で選んで cd
 ```
 
 ## 前提
@@ -137,7 +148,7 @@ make help          ターゲット一覧
 テンプレートからコピーして値を埋める。
 
 ```sh
-cp ~/work/dotfiles/src/git/config.local.example ~/.gitconfig.local
+cp "$(ghq root)"/github.com/koga-s-cr/dotfiles/src/git/config.local.example ~/.gitconfig.local
 $EDITOR ~/.gitconfig.local
 git config --show-origin --get user.email   # 反映確認
 ```
