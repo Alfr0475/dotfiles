@@ -6,7 +6,6 @@
 #------------------------------------------------------------------------------
 
 setopt PROMPT_SUBST       # プロンプト内の変数・コマンド置換を有効化
-setopt TRANSIENT_RPROMPT  # 実行後に右プロンプトを消す
 
 autoload -Uz colors && colors
 
