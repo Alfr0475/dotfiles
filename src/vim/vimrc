@@ -1,0 +1,43 @@
+"--------------------------------------------------------------------------------
+" vimrc  ->  ~/.vim/vimrc
+"
+" vim 7.4 以降は ~/.vimrc が無ければ ~/.vim/vimrc が読まれるため、
+" 旧環境にあった ~/.vimrc のシムは廃止した。
+"
+" プラグイン管理は NeoBundle から vim 標準の packages 機能に移した。
+" 旧環境では NeoBundle が要求する13個のうち8個が未インストールで、
+" 起動ごとに "Install bundles now? (y)es, [N]o:" のプロンプトが出て
+" 入力待ちで止まっていた。
+"
+" プラグインは ~/.vim/pack/plugins/start/ に置く（リポジトリ管理外）。
+"   導入・更新: make vim-plugins
+"   一覧の定義: etc/vim-plugins.txt
+"--------------------------------------------------------------------------------
+
+" vi互換ではなくVimのデフォルト設定にする
+set nocompatible
+
+filetype off
+
+" packages を読み込む。
+" 既定では vimrc の実行後に読み込まれるが、conf.d から
+" プラグインの有無を判定したいので、ここで先に読み込んでおく。
+if has('packages')
+  packloadall
+endif
+
+filetype plugin on
+
+"--------------------------------------------------------------------------------
+" プラグインの導入判定
+"
+" 旧環境の neobundle#is_installed() の代替。
+" 引数は pack/plugins/start/ 配下のディレクトリ名で、
+" 旧設定が渡していた名前をそのまま使える。
+"--------------------------------------------------------------------------------
+function! DotHasVimPlugin(name) abort
+  return isdirectory(expand('~/.vim/pack/plugins/start/' . a:name))
+endfunction
+
+" 設定ファイルの読み込み
+runtime! conf.d/*.vim

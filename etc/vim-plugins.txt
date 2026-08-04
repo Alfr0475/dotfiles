@@ -1,0 +1,18 @@
+# vim プラグインの一覧  ->  make vim-plugins
+#
+#   <配置名>  <git URL>
+#
+# vim 標準の packages 機能で ~/.vim/pack/plugins/start/<配置名> に clone される。
+# 配置名は conf.d 内の DotHasVimPlugin() に渡す名前と一致させること。
+#
+# 空行と `#` 始まりの行は無視される。
+#
+# 旧環境の NeoBundle は13個を要求していたが、実際に導入されていたのは5個だけで、
+# 残り8個は起動ごとに導入プロンプトを出して入力待ちで止まっていた。
+# ここには実際に機能していたものだけを挙げている。
+#   - vimproc         : unite 用のため、unite を入れていない現状では不要
+#   - lightline-hybrid: lightline 本体が無いため単体では機能しない
+#   - neobundle       : プラグイン管理を packages に移したため不要
+
+vim-hybrid              https://github.com/w0ng/vim-hybrid.git
+vim-anzu                https://github.com/osyo-manga/vim-anzu.git
