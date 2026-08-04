@@ -19,6 +19,7 @@
 brew "tmux"                          # ターミナルマルチプレクサ
 brew "reattach-to-user-namespace"    # tmux から macOS のクリップボードを触るため
 brew "tig"                           # git の TUI
+brew "git-lfs"                       # Git LFS（.gitconfig の filter "lfs" が要求する）
 brew "rmtrash"                       # ゴミ箱送りの削除（rm 互換のオプションを取る）
 brew "dfc"                           # df の代替
 brew "coreutils"                     # GNU coreutils (macOS のコマンドは古い)
