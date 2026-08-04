@@ -100,7 +100,7 @@ else
   log_ok "本体あり"
 
   # 設定は $XDG_CONFIG_HOME/tmux-powerline/ 配下しか読まれない。
-  # 旧環境の ~/.tmux-powerlinerc に置くと黙って無視される。
+  # それ以外の場所に置くと黙って無視される。
   pl_conf="${XDG_CONFIG_HOME:-$HOME/.config}/tmux-powerline/config.sh"
   if [ -e "$pl_conf" ]; then
     log_ok "$(tilde "$pl_conf")"

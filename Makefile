@@ -14,7 +14,7 @@ DOTFILES_ROOT := $(patsubst %/,%,$(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 SCRIPTS       := $(DOTFILES_ROOT)/scripts
 
 # スクリプト側は自身の位置から DOTFILES_ROOT を導出するので export はしない。
-# （旧 dotfiles の DOTPATH のような外部変数に依存させないため）
+# （外部から与えられた変数に依存させないため）
 
 .DEFAULT_GOAL := install
 

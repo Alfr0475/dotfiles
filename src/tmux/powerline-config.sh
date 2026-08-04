@@ -1,9 +1,8 @@
 # tmux-powerline の設定  ->  ~/.config/tmux-powerline/config.sh
 #
-# 旧環境では ~/.tmux-powerlinerc に置いていたが、現行の tmux-powerline は
-# $XDG_CONFIG_HOME/tmux-powerline/config.sh しか読まないため配置先を変えた
-# （旧パスに置くと設定が無視され、カスタムテーマも見つからない）。
-# 変数名は旧環境のものがそのまま有効。
+# 現行の tmux-powerline は $XDG_CONFIG_HOME/tmux-powerline/config.sh しか
+# 読まない（それ以外の場所に置くと設定が無視され、カスタムテーマも
+# 見つからない）。
 #
 # Default configuration file for tmux-powerline.
 # Modeline {

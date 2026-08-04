@@ -1,7 +1,6 @@
 #------------------------------------------------------------------------------
 # キーバインド
 #
-# 旧 .zsh.d の bindkey / zle 定義はここへ移す。
 #   確認: bindkey / bindkey -l
 #------------------------------------------------------------------------------
 
@@ -32,8 +31,8 @@ if (( $+commands[peco] )); then
     bindkey '^R' __peco-select-history
 fi
 
-# 単語境界は zsh 既定のまま（旧環境も select-word-style / WORDCHARS を
-# 設定していなかった）。Ctrl-W はパス全体を削除する。
+# 単語境界は zsh 既定のまま（select-word-style / WORDCHARS は設定しない）。
+# Ctrl-W はパス全体を削除する。
 # / や . を区切りとして扱いたい場合は次を有効にする:
 #   autoload -Uz select-word-style
 #   select-word-style bash

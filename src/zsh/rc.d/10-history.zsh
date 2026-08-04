@@ -14,7 +14,7 @@ setopt HIST_IGNORE_ALL_DUPS   # 重複は古い方を消す
 setopt HIST_IGNORE_SPACE      # 空白始まりのコマンドは記録しない
 setopt HIST_NO_STORE          # history コマンド自体は記録しない
 
-# 以下は旧環境では未設定だったので入れない（記録・展開の挙動が変わるため）
+# 以下は入れない（記録・展開の挙動が変わるため）
 # setopt EXTENDED_HISTORY     # 実行時刻と所要時間も記録
 # setopt HIST_REDUCE_BLANKS   # 余分な空白を詰めて記録
 # setopt HIST_VERIFY          # ヒストリ展開後に即実行せず確認

@@ -10,8 +10,8 @@ set -euo pipefail
 # このファイルは <リポジトリ>/scripts/lib/common.sh に置かれている前提。
 #
 # 環境変数を初期値に使わず必ずここで導出する。
-# 旧 dotfiles が DOTPATH を export しているなど、外から与えられた値を
-# 信用すると別のリポジトリを指してしまうため。
+# DOTPATH のような外から与えられた値を信用すると
+# 別のリポジトリを指してしまうため。
 DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 export DOTFILES_ROOT
 

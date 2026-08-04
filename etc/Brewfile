@@ -33,8 +33,7 @@ brew "lesspipe"                      # lesspipe (less の前処理)
 #------------------------------------------------------------------------------
 cask "font-hackgen"                  # 日本語対応の等幅フォント
 # tmux-powerline のセパレータ字形(U+E0B0 等)に必要。
-# 旧環境の iTerm2 は HackGenConsoleForPowerline を指定していたが、
-# HackGen 側で命名が変わり現在は HackGenConsoleNF が後継。
+# iTerm2 のプロファイルで指定するフォント名は HackGenConsoleNF。
 cask "font-hackgen-nerd"             # powerline / Nerd Font 字形入りの HackGen
 cask "claude-code"
 

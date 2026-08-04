@@ -202,8 +202,8 @@ make iterm2-load    # リポジトリ -> ~/.config/iterm2（設定を戻す）
 | `src/tmux/powerline-themes/note.sh` | カスタムテーマ → `~/.config/tmux-powerline/themes/` |
 
 現行の tmux-powerline は設定を `$XDG_CONFIG_HOME/tmux-powerline/` 配下しか
-読まない。旧環境の `~/.tmux-powerlinerc` に置くと**黙って無視され**、
-カスタムテーマも見つからずステータスラインが空になる。
+読まない。それ以外の場所に置くと**黙って無視され**、カスタムテーマも
+見つからずステータスラインが空になる。
 
 セパレータの字形（U+E0B0 等）にはパッチ済みフォントが必要なので
 `font-hackgen-nerd` を Brewfile に入れている。`ifstat` と `tmux-mem-cpu-load` は
@@ -217,7 +217,7 @@ make iterm2-load    # リポジトリ -> ~/.config/iterm2（設定を戻す）
 
 ## Claude Code の設定
 
-`src/claude/` に置いている（旧 `Alfr0475/claude.d` から統合）。
+`src/claude/` に置いている。
 
 | ファイル | 内容 |
 | --- | --- |
@@ -243,22 +243,3 @@ VS Code のユーザー設定に追加すると、コンテナ内でも同じ設
 ```
 
 `claude-install.sh` はコンテナ内に claude CLI が無ければ npm / apt / brew で導入を試みる。
-
-## 旧環境からの移行メモ
-
-旧リポジトリ（`Alfr0475/dotfiles`）はサブモジュール構成（`zsh.d` / `tmux.d` など）
-だったが、こちらは単一リポジトリにしている。移行時の対応:
-
-| 旧 | 新 |
-| --- | --- |
-| `src/.zsh.d/zshrc` | `src/zsh/rc.d/*.zsh` に分割して移す |
-| `src/.zsh.d/zshenv` | `src/.zshenv` |
-| `src/.zsh.d/completions` | `~/.config/zsh/completions`（`20-completion.zsh` が fpath に追加） |
-| `src/.zsh.d/zplug` | zplug は未メンテ。`80-plugin.zsh` を見て見直す |
-| `src/.tmux.d/` + tmux-powerline | `src/.tmux.conf` に統合 |
-| `bin/` の自作スクリプト | `src/bin/` に置いて `links.conf` で `~/bin` にリンクする |
-| `etc/init/osx/*.sh` | 未移行。必要になったら `scripts/macos-defaults.sh` を作る |
-
-移行中は旧設定が `~/.dotfiles/` に残っているので、そこから内容をコピーする。
-旧リポジトリのリンクを剥がすのは新環境の動作を確認してからでよい
-（`make deploy` は実体を `.bak.<timestamp>` に退避するので、旧リンクは自動で外れる）。
