@@ -116,9 +116,24 @@ make help          ターゲット一覧
 
 | ファイル | 読まれるタイミング |
 | --- | --- |
+| `~/.gitconfig.local` | `.gitconfig` の `[include]` |
 | `~/.zshenv.local` | `.zshenv` の最後 |
 | `~/.zshrc.local` | `.zshrc` の最後 |
 | `~/.tmux.conf.local` | `.tmux.conf` の最後 |
+
+### 新しい Mac で必要な手作業
+
+`~/.gitconfig.local` だけは `make` では作られないので、テンプレートからコピーして
+git のユーザー名とメールアドレスを設定する。
+
+```sh
+cp ~/work/dotfiles/src/git/config.local.example ~/.gitconfig.local
+$EDITOR ~/.gitconfig.local
+git config --show-origin --get user.email   # 反映確認
+```
+
+設定しないと git がホスト名から推測した無効なアドレスでコミットしてしまい、
+それが履歴に永久に残る（GitHub 上でもアカウントに紐付かない）。
 
 ## 旧環境からの移行メモ
 

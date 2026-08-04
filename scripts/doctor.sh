@@ -48,6 +48,48 @@ else
 fi
 
 #------------------------------------------------------------------------------
+log_header "git"
+#------------------------------------------------------------------------------
+# ~/.gitconfig.local は make では作られない（マシン固有のためリポジトリ管理外）。
+# 未設定のまま commit すると git がホスト名から推測した無効なアドレスが
+# 履歴に永久に残るので、ここで検出する。
+if ! has git; then
+  log_fail "git が無い"
+  note_problem
+else
+  git_name="$(git config --get user.name 2>/dev/null || true)"
+  git_email="$(git config --get user.email 2>/dev/null || true)"
+
+  if [ -n "$git_name" ] && [ -n "$git_email" ]; then
+    log_ok "user = $git_name <$git_email>"
+  else
+    log_fail "user.name / user.email が未設定"
+    log_info "        cp $(tilde "$SRC_DIR")/git/config.local.example ~/.gitconfig.local"
+    note_problem
+  fi
+
+  # core.excludesfile / attributesfile の参照先が実在するか
+  # （過去に単数形 .gitattribute を指していて機能していなかったことがある）
+  for key in core.excludesfile core.attributesfile; do
+    path="$(git config --get "$key" 2>/dev/null || true)"
+    [ -n "$path" ] || continue
+    case "$path" in '~/'*) path="$HOME/${path#\~/}" ;; esac
+    if [ -e "$path" ]; then
+      log_ok "$key = $(tilde "$path")"
+    else
+      log_fail "$key の参照先が無い: $path"
+      note_problem
+    fi
+  done
+
+  # filter "lfs" を設定しているなら git-lfs 本体が必要
+  if [ -n "$(git config --get filter.lfs.required 2>/dev/null || true)" ] && ! has git-lfs; then
+    log_fail "filter.lfs が設定されているが git-lfs が無い -> make brew"
+    note_problem
+  fi
+fi
+
+#------------------------------------------------------------------------------
 log_header "Homebrew"
 #------------------------------------------------------------------------------
 if [ ! -x "$BREW_BIN" ]; then
