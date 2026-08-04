@@ -29,7 +29,7 @@ if [ -z $TMUX_POWERLINE_LEFT_STATUS_SEGMENTS ]; then
         # 実行されてエラーになる（配列は改行で区切れるので `\` は不要）。
         "tmux_session_info 148 234"   # セッション
         "hostname 33 0"               # ホスト名
-        "ifstat 30 255"               # ネットワーク利用率
+        #"ifstat 30 255"               # ネットワーク利用率
         #"ifstat_sys 30 255"          # ネットワークシステム
         "lan_ip 24 255 ${TMUX_POWERLINE_SEPARATOR_RIGHT_THIN}"   # LAN IPアドレス
         "wan_ip 24 255"                                          # WAN IPアドレス
