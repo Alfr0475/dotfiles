@@ -12,13 +12,18 @@ setopt PUSHD_IGNORE_DUPS    # pushd の重複を積まない
 
 # 補完・グロブ
 setopt EXTENDED_GLOB        # 拡張グロブを有効化
-setopt NO_CASE_GLOB         # グロブで大文字小文字を区別しない
-setopt NUMERIC_GLOB_SORT    # 数値を含む名前を数値順に並べる
+setopt GLOB_DOTS            # * でドットファイルもマッチさせる
+setopt MARK_DIRS            # glob 結果のディレクトリに / を付ける
+# 旧環境では未設定だったので入れない（挙動が変わるため）
+# setopt NO_CASE_GLOB       # グロブで大文字小文字を区別しない
+# setopt NUMERIC_GLOB_SORT  # 数値を含む名前を数値順に並べる
 
 # 入力
 setopt NO_BEEP              # ビープを鳴らさない
 setopt NO_FLOW_CONTROL      # Ctrl-S / Ctrl-Q を無効化
-setopt INTERACTIVE_COMMENTS # 対話シェルでも # コメントを許可
+setopt PRINT_EIGHT_BIT      # 8bit 文字をそのまま出力する（日本語向け）
+# 旧環境ではコメントアウトされていたので入れない
+# setopt INTERACTIVE_COMMENTS # 対話シェルでも # コメントを許可
 
 # 誤操作防止
 unsetopt RM_STAR_SILENT     # rm * の前に確認する
