@@ -27,6 +27,24 @@ alias ...='cd ../..'
 # dotfiles リポジトリへ移動する
 alias dot='cd "$(ghq root)/github.com/koga-s-cr/dotfiles"'
 
+# 状況ボード（board-agent）。常駐しているボードに積む・片付ける。
+#
+# alias ではなく関数にしているのは、引数をそのまま渡したいため
+# （`board 経費精算` のようにサブコマンドを省いて積める）。
+# mise exec を通しているのは、node を board-agent 側の mise.toml で固定しており、
+# グローバルには node を置いていないため。
+function board() {
+    local root="$(ghq root)/github.com/koga-s-cr/board-agent"
+
+    # リポジトリを消した／移した後に、意味の分からないエラーで悩まないようにする
+    if [[ ! -f $root/src/cli.js ]]; then
+        echo "board-agent が見つからない: $root" >&2
+        return 1
+    fi
+
+    mise exec --cd "$root" -- node "$root/src/cli.js" "$@"
+}
+
 # peco
 if which peco > /dev/null; then
     alias pg='cd $(ghq list -p | peco --prompt "REPOSITORY >" --query "$LBUFFER")'
