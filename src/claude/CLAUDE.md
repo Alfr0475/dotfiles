@@ -70,6 +70,35 @@
 - マシン固有の設定は `~/.gitconfig.local` `~/.zshenv.local` `~/.zshrc.local`
   `~/.tmux.conf.local` に置く。リポジトリに秘密情報を書かない。
 
+## 状況ボード（board-agent）
+
+`~/work/sources/git/github.com/koga-s-cr/board-agent` は、判断待ち・口頭メモ・要対応メール・
+Slack・PR・Jira・予定と Claude の稼働状況を1画面に集める常駐ツール。読み取り専用で、外部への
+送信・投稿は一切しない。
+
+| 項目 | 値 |
+| --- | --- |
+| 常駐 | `127.0.0.1:7788` の Node。launchd `com.koga-s.board-agent`（ログイン時起動・`KeepAlive`） |
+| 画面 / ログ | http://127.0.0.1:7788/ ／ `~/Library/Logs/board-agent.log` |
+| 登録・解除・状態 | board-agent の `scripts/install-agent.sh`（`--status` / `--uninstall`） |
+
+**IMPORTANT: MCP をユーザースコープに登録済みなので、どのプロジェクトで作業していても
+`board_*` ツールが使える。使いどころは各ツールの説明文に従う。**
+
+- 数分以上かかる作業に入る**前**に `board_agent_start`。終わったら必ず `board_agent_update` で
+  `done` にする（放置すると「作業中」が画面に居座る）
+- 決められない判断は `board_add` で `decision` に積む。**積んだあとは返答を待たず他の作業を
+  進めてよい。** 口頭の依頼に触れたら `verbal` に積み、判断が示されたら `board_resolve` で閉じる
+- 登録先は `~/.claude.json`（dotfiles 管理外）。マシンを移したら
+  `claude mcp add --transport http --scope user board http://127.0.0.1:7788/mcp` を打ち直す
+- `.env`（資格情報）と `data/`（状態と OAuth トークン）は git 管理外。コミットしない、中身を
+  ログやコミットメッセージに出さない。状態は `data/board.json` を直接書き換えないこと
+  （常駐中はメモリ側が正で上書きされる）。MCP か REST か CLI を通す
+
+**ユーザーが対話 zsh から使う `board` コマンド（`src/zsh/rc.d/40-alias.zsh` の zsh 関数）が
+Claude のシェルで `command not found` になっても壊れていない。** 非対話シェルで `.zshrc` が
+読まれないだけ。直そうとせず、Claude は MCP ツールを使う。
+
 ## Dev Container
 
 Dev Container 内で Claude を使うには **VS Code Dotfiles 機能**を使う。プロジェクトの `devcontainer.json` は変更しない（チーム開発への影響を避けるため）。
