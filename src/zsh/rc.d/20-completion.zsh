@@ -3,16 +3,24 @@
 #
 # 自作の補完関数は ~/.config/zsh/completions に置き、
 # 下の fpath 追加で拾わせる。
+#
+# 外部アプリが置く補完も compinit より前にここで fpath へ足す。
+# ~/.zshrc は src/.zshrc へのリンクなので、アプリが .zshrc に追記すると
+# リポジトリの実体が書き換わり、末尾で compinit が二重に走る。
+# 追記されていたら消して、ここに fpath を足すこと（doctor が検出する）。
 #------------------------------------------------------------------------------
 
 fpath=(
   "${XDG_CONFIG_HOME:-$HOME/.config}/zsh/completions"(N-/)
+  "$HOME/.docker/completions"(N-/)   # Docker Desktop が生成・更新する
   $fpath
 )
 
 autoload -Uz compinit
 
-# compinit は毎回フルチェックすると遅いので、1日1回だけ検証する
+# compinit は毎回フルチェックすると遅いので、1日1回だけ検証する。
+# -C は dump をそのまま読むだけなので、上の fpath に補完を足した直後は
+# rm ~/.cache/zsh/zcompdump で作り直さないと新しい補完が効かない。
 _zcompdump="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
 [[ -d ${_zcompdump:h} ]] || mkdir -p "${_zcompdump:h}"
 

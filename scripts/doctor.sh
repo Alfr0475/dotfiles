@@ -48,6 +48,36 @@ else
 fi
 
 #------------------------------------------------------------------------------
+log_header "zsh"
+#------------------------------------------------------------------------------
+# ~/.zshrc は src/.zshrc へのリンクなので、外部アプリが ~/.zshrc に追記すると
+# リポジトリの実体が書き換わる（Docker Desktop が実際にやる）。
+# src/.zshrc は末尾が `true` で終わる前提なので、それで追記を検出する。
+ZSHRC_SRC="$SRC_DIR/.zshrc"
+if [ ! -f "$ZSHRC_SRC" ]; then
+  log_fail "src/.zshrc が無い"
+  note_problem
+elif [ "$(tail -n 1 "$ZSHRC_SRC")" != "true" ]; then
+  log_fail "src/.zshrc が外部から追記されている（末尾が true でない）"
+  grep -n 'added by\|End of' "$ZSHRC_SRC" | while read -r line; do
+    log_info "        $line"
+  done
+  log_info "        補完の fpath は src/zsh/rc.d/20-completion.zsh に寄せ、追記は消す"
+  note_problem
+else
+  log_ok "src/.zshrc に外部からの追記なし"
+fi
+
+# 追記された compinit が走ると既定の ~/.zcompdump が作られ、
+# 20-completion.zsh が使う ~/.cache/zsh/zcompdump と二重になる。
+if [ -e "$HOME/.zcompdump" ]; then
+  log_fail "~/.zcompdump がある（compinit が二重に走った痕跡） -> rm ~/.zcompdump"
+  note_problem
+else
+  log_ok "compinit の dump は ~/.cache/zsh/zcompdump のみ"
+fi
+
+#------------------------------------------------------------------------------
 log_header "git"
 #------------------------------------------------------------------------------
 # ~/.gitconfig.local は make では作られない（マシン固有のためリポジトリ管理外）。
