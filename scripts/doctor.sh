@@ -189,7 +189,7 @@ if [ -L "$HOME/.claude" ]; then
   log_info "        rm ~/.claude && mkdir -p ~/.claude && make claude"
   note_problem
 else
-  for item in CLAUDE.md settings.json skills; do
+  for item in CLAUDE.md settings.json skills agents; do
     src="$CLAUDE_SRC/$item"
     dest="$HOME/.claude/$item"
     [ -e "$src" ] || continue
