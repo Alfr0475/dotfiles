@@ -6,6 +6,9 @@
 
 setopt PROMPT_SUBST       # プロンプト内の変数・コマンド置換を有効化
 
+# 日時を実文字列に確定させるために使う（strftime / EPOCHSECONDS）
+zmodload zsh/datetime
+
 autoload -Uz colors && colors
 
 # git のブランチ名などをプロンプトに出す
@@ -112,9 +115,31 @@ function +vi-git-stash-count() {
 }
 
 
-# 左側のプロンプトを構成する関数
+# プロンプトを構成する関数
+#
+# 1行目は左に AWS プロファイルとカレントディレクトリ、右端に VCS 情報と日時。
+# 2行目は user@host と tmux のペイン番号、プロンプトマーク。
 function __left_prompt {
-    local formatted_upper_prompt="`__prompt_get_awsprof``__prompt_get_path`"$'\n'
+    local upper_left="`__prompt_get_awsprof``__prompt_get_path`"
+
+    local upper_right="`__prompt_get_exec_time`"
+    local vcs_info_msg="`__prompt_get_vcs_info_msg`"
+    if [ -n "$vcs_info_msg" ]; then
+        upper_right="$vcs_info_msg $upper_right"
+    fi
+
+    # 幅を持たないプロンプトエスケープ（%F{...} や %B などの色・装飾）を
+    # 取り除いてから表示幅を測る。(S%%) はプロンプト展開を伴う置換。
+    local zero='%([BSUbfksu]|([FK]|){*})'
+    local -i upper_left_width=${#${(S%%)upper_left//$~zero/}}
+    local -i upper_right_width=${#${(S%%)upper_right//$~zero/}}
+
+    # 先頭のスペース1つと、右端に触れないためのマージン1つを差し引く。
+    # パスが長くて収まらない場合はスペース1つで繋ぐ（折り返させない）。
+    local -i pad=$(( COLUMNS - 2 - upper_left_width - upper_right_width ))
+    (( pad < 1 )) && pad=1
+
+    local formatted_upper_prompt="${upper_left}${(l:$pad:):-}${upper_right}"$'\n'
     local formatted_under_prompt="`__prompt_get_user`@`__prompt_get_host`"
 
     # なぜかここがエラーになる
@@ -131,13 +156,9 @@ function __left_prompt {
 }
 
 
-# 右側のプロンプトを構成する関数
-function __right_prompt {
-    local formatted_prompt="`__prompt_get_vcs_info_msg``__prompt_get_exec_time`"
-
-    # 右側のプロンプト
-    RPROMPT="$formatted_prompt"
-}
+# 右側のプロンプトは使わない。
+# VCS 情報と日時は1行目の右端に寄せたので、コマンド入力行には何も出さない。
+RPROMPT=''
 
 
 #---------------------------------------
@@ -208,10 +229,15 @@ function __prompt_get_awsprof {
 }
 
 # コマンドの実行時刻
+#
+# 右端揃えのために表示幅を測る必要がある。プロンプトの %D{...} のまま渡すと、
+# 幅ゼロのエスケープを取り除くパターンが秒指定の %S を色装飾の %S と誤認して
+# 消してしまうため、ここで実文字列に確定させてから埋め込む。
 function __prompt_get_exec_time {
-    echo "%{$fg[green]%} %D{%Y/%m/%d} %* %{$reset_color%}"
+    local now
+    strftime -s now '%Y/%m/%d %H:%M:%S' $EPOCHSECONDS
+    echo "%F{green}${now}%f"
 }
 
 
 add-zsh-hook precmd __left_prompt
-add-zsh-hook precmd __right_prompt
