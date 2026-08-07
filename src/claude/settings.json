@@ -1,5 +1,40 @@
 {
   "model": "opus[1m]",
   "effortLevel": "high",
-  "language": "japanese"
+  "language": "japanese",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/curl -m 1 -sf -o /dev/null -X POST http://127.0.0.1:7788/api/hooks/claude -H 'content-type: application/json' --data-binary @- || true",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/curl -m 1 -sf -o /dev/null -X POST http://127.0.0.1:7788/api/hooks/claude -H 'content-type: application/json' --data-binary @- || true",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/curl -m 1 -sf -o /dev/null -X POST http://127.0.0.1:7788/api/hooks/claude -H 'content-type: application/json' --data-binary @- || true",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
 }

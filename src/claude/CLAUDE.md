@@ -91,6 +91,9 @@ Slack・PR・Jira・予定と Claude の稼働状況を1画面に集める常駐
   進めてよい。** 口頭の依頼に触れたら `verbal` に積み、判断が示されたら `board_resolve` で閉じる
 - 登録先は `~/.claude.json`（dotfiles 管理外）。マシンを移したら
   `claude mcp add --transport http --scope user board http://127.0.0.1:7788/mcp` を打ち直す
+- セッションが動いていること自体は `settings.json` の hook が自動でボードに載せる（60秒以上
+  続いたものだけ）。**それとは別に `board_agent_start` は呼ぶこと。** hook は「動いている」
+  しか伝えられず、「何をしているか」は Claude 自身にしか書けない
 - `.env`（資格情報）と `data/`（状態と OAuth トークン）は git 管理外。コミットしない、中身を
   ログやコミットメッセージに出さない。状態は `data/board.json` を直接書き換えないこと
   （常駐中はメモリ側が正で上書きされる）。MCP か REST か CLI を通す
