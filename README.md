@@ -170,7 +170,7 @@ fpath に補完を足した直後は `rm ~/.cache/zsh/zcompdump` で dump を作
 
 ### 新しい Mac で必要な手作業
 
-`make` で完結しないものが 2 つある。どちらも `make doctor` が未対応を検出する。
+`make` で完結しないものが 3 つある。いずれも `make doctor` が未対応を検出する。
 
 **1. git のユーザー設定**
 
@@ -206,6 +206,19 @@ defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true
 ```
 
 plist 本体は `make install`（`make iterm2`）がリポジトリから復元する。
+
+**3. gh（GitHub CLI）の認証**
+
+`gh` は mise で入るが、認証はブラウザを使う対話操作なので `make` では終わらない。
+認証情報は `~/.config/gh/hosts.yml` に置かれる（トークンなのでリポジトリ管理外）。
+
+```sh
+gh auth login       # GitHub.com / HTTPS / ブラウザ認証 を選ぶ
+gh auth status      # 反映確認
+```
+
+未認証だと `gh pr` などが全て失敗する。`make doctor` は hosts.yml の有無だけを見る
+（API を叩くと遅いため、トークンが生きているかまでは見ない）。
 
 ### iTerm2 の設定を更新したとき
 

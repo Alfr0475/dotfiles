@@ -23,6 +23,7 @@
 # lazygit = "latest"
 peco = "latest"
 ghq = "latest"
+gh = "latest"      # GitHub CLI（ghq とは別物。PR / issue の操作）
 
 [settings]
 # .tool-versions / mise.toml を自動で信頼しない（意図しないツール実行を防ぐ）

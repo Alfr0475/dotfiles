@@ -119,6 +119,18 @@ else
   fi
 fi
 
+# gh (GitHub CLI) は make では認証できない。未認証だと gh pr / gh issue が全て失敗する。
+# `gh auth status` はトークン検証で API を叩いて遅いので、ここではローカルに
+# 認証情報が置かれているかだけを見る（トークンの有効性までは見ない）。
+if has gh || "$MISE_BIN" which gh >/dev/null 2>&1; then
+  if [ -s "${XDG_CONFIG_HOME:-$HOME/.config}/gh/hosts.yml" ]; then
+    log_ok "gh は認証済み"
+  else
+    log_warn "gh が未認証 -> gh auth login"
+    note_problem
+  fi
+fi
+
 #------------------------------------------------------------------------------
 log_header "tmux-powerline"
 #------------------------------------------------------------------------------
