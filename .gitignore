@@ -24,5 +24,9 @@ src/claude/history.jsonl
 src/claude/remote-settings.json
 src/claude/policy-limits.json
 
+# claude.ai から自動同期される公式スキルと、同期時の退避先
+src/claude/skills/synced/
+src/claude/skills/.trash/
+
 # 認証情報はどの階層にあっても除外する
 .credentials.json
