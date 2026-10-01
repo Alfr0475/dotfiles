@@ -248,6 +248,18 @@ else
       note_problem
     fi
   fi
+
+  # 開発フロー（dd-* スキル）の保存先を決めるスクリプト。各スキルがこれを
+  # 直接実行するため、実行ビットが落ちると全スキルが保存先を得られない。
+  ddir="$CLAUDE_SRC/skills/_lib/design-docs-dir.sh"
+  if [ -e "$ddir" ]; then
+    if [ -x "$ddir" ]; then
+      log_ok "skills/_lib/design-docs-dir.sh は実行可能"
+    else
+      log_fail "skills/_lib/design-docs-dir.sh に実行ビットが無い -> chmod +x $ddir"
+      note_problem
+    fi
+  fi
 fi
 
 #------------------------------------------------------------------------------

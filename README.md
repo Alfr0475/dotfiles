@@ -266,7 +266,7 @@ make iterm2-load    # リポジトリ -> ~/.config/iterm2（設定を戻す）
 | --- | --- |
 | `CLAUDE.md` | 全プロジェクト共通の行動指針 |
 | `settings.json` | モデルと effort の設定、hook の登録 |
-| `skills/` | 自作スキル（`join-project`, `promote-product`） |
+| `skills/` | 自作スキル（`join-project`, `promote-product`, `verification-items`, 開発フローの `dd-*`） |
 | `agents/` | 自作サブエージェント（`executor`） |
 | `hooks/` | Claude Code の hook から呼ばれるスクリプト |
 
@@ -288,6 +288,34 @@ make iterm2-load    # リポジトリ -> ~/.config/iterm2（設定を戻す）
 手順を厳密に指定する規約は `agents/` 側に閉じ込め、`CLAUDE.md` には書かない。
 上位モデルに対する過度に規範的な指示は出力品質を下げるため、切り替え地点を
 `settings.json` の `model` 1 行だけに保つ。
+
+### 開発フロー（`dd-*` スキル）
+
+要件の深掘りから実装までを、**人間が計画を理解してから実装に進む**流れに固定する
+スキル群。[AIに理解を外注しない](https://zenn.dev/avaintelligence/articles/dont-outsource-understanding-to-ai)
+の流れのうち実装までを取り入れ、PR 作成・レビューはプロジェクトのルールに合わせて手で行う。
+
+```
+/dd-requirements <チケット番号 / URL / 依頼文>   要件を深掘り → requirements.md
+/dd-plan <作業名>                               実装計画 → plan.md
+/dd-review-plan <作業名>                        文脈を持たない別エージェントが計画をレビュー → plan-review.md
+/dd-explain <作業名> [D-xx]                     計画を図解した HTML → explain/
+--- 新しいセッションで ---
+/dd-implement <作業名>                          計画どおりに実装し、セルフレビューを 3 回
+```
+
+生成物はリポジトリに置かない（プロジェクトごとにルールが違うため）。保存先はローカルの次の場所:
+
+```
+~/work/design-docs/<host>/<org>/<repo>/<作業名>/
+```
+
+- `<host>/<org>/<repo>` は `git remote origin` から算出する（ghq と同じ階層）。origin が無ければ `local/<ディレクトリ名>`
+- `<作業名>` は `<チケット番号>-<英小文字ケバブの要約>`（例: `CRM-1234-coupon-validation`）。チケットが無ければ要約のみ
+- ルートは `DESIGN_DOCS_ROOT` で変えられる（Dev Container ではコンテナ内に作られ、再ビルドで消えるため）
+
+このルールは `skills/_lib/design-docs-dir.sh` だけが持ち、各スキルはこれを呼ぶ。
+`_lib/` には `SKILL.md` が無いのでスキルとしては読み込まれない。
 
 ### セッション名の自動付け替え
 
