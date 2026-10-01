@@ -21,6 +21,11 @@
             "type": "command",
             "command": "/usr/bin/curl -m 1 -sf -o /dev/null -X POST http://127.0.0.1:7788/api/hooks/claude -H 'content-type: application/json' --data-binary @- || true",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude/hooks/session-retitle.sh\" || true",
+            "timeout": 10
           }
         ]
       }

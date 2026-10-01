@@ -201,7 +201,7 @@ if [ -L "$HOME/.claude" ]; then
   log_info "        rm ~/.claude && mkdir -p ~/.claude && make claude"
   note_problem
 else
-  for item in CLAUDE.md settings.json skills agents; do
+  for item in CLAUDE.md settings.json skills agents hooks; do
     src="$CLAUDE_SRC/$item"
     dest="$HOME/.claude/$item"
     [ -e "$src" ] || continue
@@ -226,6 +226,25 @@ else
       log_ok "src/claude/settings.json は妥当な JSON"
     else
       log_fail "src/claude/settings.json が JSON として不正"
+      note_problem
+    fi
+  fi
+
+  # セッション名の自動付け替え（Stop hook）。実行ビットが落ちると hook は
+  # 黙って失敗するだけで、タイトルが更新されない理由が分からなくなる。
+  retitle="$CLAUDE_SRC/hooks/session-retitle.sh"
+  if [ -e "$retitle" ]; then
+    if [ -x "$retitle" ]; then
+      log_ok "hooks/session-retitle.sh は実行可能"
+    else
+      log_fail "hooks/session-retitle.sh に実行ビットが無い -> chmod +x $retitle"
+      note_problem
+    fi
+
+    if grep -q 'session-retitle.sh' "$CLAUDE_SRC/settings.json" 2>/dev/null; then
+      log_ok "session-retitle.sh は settings.json の hook に登録済み"
+    else
+      log_fail "session-retitle.sh が settings.json の hook に未登録"
       note_problem
     fi
   fi

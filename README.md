@@ -265,9 +265,10 @@ make iterm2-load    # リポジトリ -> ~/.config/iterm2（設定を戻す）
 | ファイル | 内容 |
 | --- | --- |
 | `CLAUDE.md` | 全プロジェクト共通の行動指針 |
-| `settings.json` | モデルと effort の設定 |
+| `settings.json` | モデルと effort の設定、hook の登録 |
 | `skills/` | 自作スキル（`join-project`, `promote-product`） |
 | `agents/` | 自作サブエージェント（`executor`） |
+| `hooks/` | Claude Code の hook から呼ばれるスクリプト |
 
 ### サブエージェント
 
@@ -287,6 +288,43 @@ make iterm2-load    # リポジトリ -> ~/.config/iterm2（設定を戻す）
 手順を厳密に指定する規約は `agents/` 側に閉じ込め、`CLAUDE.md` には書かない。
 上位モデルに対する過度に規範的な指示は出力品質を下げるため、切り替え地点を
 `settings.json` の `model` 1 行だけに保つ。
+
+### セッション名の自動付け替え
+
+`hooks/session-retitle.sh`（`Stop` hook）が、直近の会話に合わせて
+`/resume` 一覧のセッション名を付け替える。
+
+Claude Code の自動タイトル生成は **1 セッションにつき 1 回だけ**で、最初の
+プロンプトがそのままタイトルとして残る。会話中に話題が移ると一覧から目的の
+セッションを見つけられないため、外から付け替えている。
+
+タイトルは会話ログ（`~/.claude/projects/*/<session-id>.jsonl`）への追記で表現され、
+優先順位は `custom-title` > `ai-title` > `summary` > 最初のプロンプト。この hook は
+`custom-title` を追記する。Claude Code 側も追記を読み直して採用するため、
+実行中のセッションのプロンプト表示にも反映される。
+
+**追記しただけでは一覧に出ない。** セッション一覧は転写ログ全体を読まず、
+**先頭 64KB と末尾 64KB** しか見ない（Claude Code 内の `$I = 65536`）。追記した
+タイトルはその後の会話でこの窓から押し出されるため、末尾から 32KB 以上離れたら
+同じタイトルを末尾へ再追記して窓の中へ戻す（モデルは呼ばない）。Claude Code 自身が
+`last-prompt` や `ai-title` を延々と再追記しているのも同じ理由。
+
+| 挙動 | 内容 |
+| --- | --- |
+| 発火 | 応答が終わるたび（`Stop`）。判定だけ同期で行い、生成はバックグラウンド |
+| 間隔 | 前回更新から 10 分以上、かつ前回以降にユーザー発言が 2 回以上 |
+| 窓の維持 | 発火ごとに位置を確認し、末尾 32KB より離れていたら再追記する |
+| 初回 | ユーザー発言が 3 回たまるまでは付け替えない |
+| モデル | `claude-haiku-4-5-20251001`（`--setting-sources ''` で hook を読ませない） |
+| 手動優先 | `/rename` で人が付けた名前を検出したら、以降そのセッションには触らない |
+| 状態 | `~/.claude/session-titles/<session-id>.json` とログ `retitle.log` |
+
+`CLAUDE_RETITLE_DISABLE=1` で無効化、`CLAUDE_RETITLE_INTERVAL` で間隔、
+`CLAUDE_RETITLE_MODEL` でモデルを変えられる。
+
+**生成のために `claude -p` を起動するので、再帰しないよう二重に防いでいる。**
+`--setting-sources ''` で hook 自体を読ませず、さらに環境変数
+`CLAUDE_SESSION_RETITLE` を立てて子プロセス側の hook を即 return させる。
 
 `~/.claude` は Claude Code 自身が会話ログやセッション状態を書き込むため、
 ディレクトリ全体はリンクにせず中身を個別にリンクする（`make claude`）。
