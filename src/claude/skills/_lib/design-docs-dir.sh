@@ -13,12 +13,28 @@
 #   design-docs-dir.sh            リポジトリ単位のディレクトリ
 #   design-docs-dir.sh <作業名>   作業ディレクトリ（作成はしない）
 #   design-docs-dir.sh --list     そのリポジトリの既存の作業名一覧
+#   design-docs-dir.sh --all      全リポジトリの作業ディレクトリ（絶対パス）。
+#                                 git の外でも使える（zsh の pdd が使う）
 
 set -euo pipefail
 
 ROOT="${DESIGN_DOCS_ROOT:-$HOME/work/design-docs}"
 
 die() { printf 'design-docs-dir: %s\n' "$*" >&2; exit 1; }
+
+# --all はリポジトリに依存しないので git のチェックより前で処理する。
+# 作業ディレクトリの深さは host 系（<host>/<org>/<repo>/<作業名>）と
+# local 系（local/<repo>/<作業名>）で違うため分けて拾う。
+if [ "${1:-}" = "--all" ]; then
+  [ -d "$ROOT" ] || exit 0
+  {
+    find "$ROOT" -mindepth 4 -maxdepth 4 -type d -not -path "$ROOT/local/*"
+    if [ -d "$ROOT/local" ]; then
+      find "$ROOT/local" -mindepth 2 -maxdepth 2 -type d
+    fi
+  } | sort
+  exit 0
+fi
 
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 \
   || die "git リポジトリの中で実行してください: $PWD"

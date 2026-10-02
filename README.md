@@ -21,6 +21,7 @@ exec $SHELL -l
 ```sh
 dot     # このリポジトリへ cd
 pg      # ghq 管理下のリポジトリを peco で選んで cd
+pdd     # dd-* スキルの生成物ディレクトリを peco で選んで cd（引数は初期クエリ）
 ```
 
 ## 前提
@@ -315,6 +316,8 @@ make iterm2-load    # リポジトリ -> ~/.config/iterm2（設定を戻す）
 - ルートは `DESIGN_DOCS_ROOT` で変えられる（Dev Container ではコンテナ内に作られ、再ビルドで消えるため）
 
 このルールは `skills/_lib/design-docs-dir.sh` だけが持ち、各スキルはこれを呼ぶ。
+`--all` で全リポジトリの作業ディレクトリを一覧でき（`ghq list -p` 相当）、
+zsh の `pdd` はこれを peco に渡して cd する。
 `_lib/` には `SKILL.md` が無いのでスキルとしては読み込まれない。
 
 ### セッション名の自動付け替え

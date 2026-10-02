@@ -49,6 +49,15 @@ function board() {
 if which peco > /dev/null; then
     alias pg='cd $(ghq list -p | peco --prompt "REPOSITORY >" --query "$LBUFFER")'
 
+    # dd-* スキルの生成物ディレクトリを選んで cd する。一覧の出し方（保存先の
+    # ルール）は design-docs-dir.sh だけが持つので、ここでは find しない。
+    # キャンセル時に cd（= ホームへ移動）しないよう alias ではなく関数にする。
+    function pdd() {
+        local dir
+        dir=$(~/.claude/skills/_lib/design-docs-dir.sh --all | peco --prompt "DESIGN DOC >" --query "$*")
+        [[ -n $dir ]] && cd "$dir"
+    }
+
     # awsp in peco
     if which aws > /dev/null; then
         function awsp() {

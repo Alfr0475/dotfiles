@@ -259,6 +259,20 @@ else
       log_fail "skills/_lib/design-docs-dir.sh に実行ビットが無い -> chmod +x $ddir"
       note_problem
     fi
+
+    # pdd が使う --all。git の外で呼ばれ、作業ディレクトリだけ（中の explain/ は
+    # 出さない）を host 系・local 系の両方から拾えること。
+    ddtmp="$(mktemp -d)"
+    mkdir -p "$ddtmp/github.com/o/r/w1/explain" "$ddtmp/local/r/w2"
+    ddgot="$(cd / && DESIGN_DOCS_ROOT="$ddtmp" bash "$ddir" --all 2>&1 || true)"
+    ddwant="$(printf '%s\n%s' "$ddtmp/github.com/o/r/w1" "$ddtmp/local/r/w2")"
+    if [ "$ddgot" = "$ddwant" ]; then
+      log_ok "design-docs-dir.sh --all は作業ディレクトリを一覧できる"
+    else
+      log_fail "design-docs-dir.sh --all の出力が想定と違う: $ddgot"
+      note_problem
+    fi
+    rm -rf "$ddtmp"
   fi
 fi
 
