@@ -213,7 +213,7 @@ if [ -L "$HOME/.claude" ]; then
   log_info "        rm ~/.claude && mkdir -p ~/.claude && make claude"
   note_problem
 else
-  for item in CLAUDE.md settings.json skills agents hooks; do
+  for item in CLAUDE.md settings.json skills agents hooks mods; do
     src="$CLAUDE_SRC/$item"
     dest="$HOME/.claude/$item"
     [ -e "$src" ] || continue
@@ -285,6 +285,42 @@ else
       note_problem
     fi
     rm -rf "$ddtmp"
+  fi
+
+  # 使用量表示の Mod（usage-limits）。settings.json の env で読み込ませているので、
+  # 値が消えると Desktop を含めて黙って表示されなくなる。コードが壊れた場合も
+  # セッション中は描画されないだけなので、validate と test でここで検出する。
+  mod="$CLAUDE_SRC/mods/usage-limits"
+  if [ ! -d "$mod" ]; then
+    log_fail "src/claude/mods/usage-limits が無い（settings.json の env が読み込めない）"
+    note_problem
+  elif has plutil; then
+    want='~/.claude/mods/usage-limits'
+    got="$(plutil -extract env.CLAUDE_CODE_PLUGIN_DIRS raw -o - "$CLAUDE_SRC/settings.json" 2>/dev/null || true)"
+    if [ "$got" = "$want" ]; then
+      log_ok "settings.json の env.CLAUDE_CODE_PLUGIN_DIRS が usage-limits を読み込む"
+    else
+      log_fail "settings.json の env.CLAUDE_CODE_PLUGIN_DIRS が \"$want\" でない: \"$got\""
+      note_problem
+    fi
+
+    claude_bin="$HOME/.local/bin/claude"
+    if [ -x "$claude_bin" ]; then
+      if "$claude_bin" plugin validate --strict "$mod" >/dev/null 2>&1; then
+        log_ok "mods/usage-limits は claude plugin validate を通る"
+      else
+        log_fail "mods/usage-limits が validate で失敗 -> claude plugin validate $mod"
+        note_problem
+      fi
+      if "$claude_bin" plugin test "$mod" >/dev/null 2>&1; then
+        log_ok "mods/usage-limits のテストが通る"
+      else
+        log_fail "mods/usage-limits のテストが失敗 -> claude plugin test $mod"
+        note_problem
+      fi
+    else
+      log_warn "claude CLI が無いため mods/usage-limits の検証を飛ばした"
+    fi
   fi
 fi
 

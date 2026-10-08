@@ -92,7 +92,7 @@ fi
 
 mkdir -p "$CLAUDE_DIR"
 
-for item in CLAUDE.md settings.json skills agents hooks; do
+for item in CLAUDE.md settings.json skills agents hooks mods; do
   src="$CLAUDE_SRC/$item"
   dest="$CLAUDE_DIR/$item"
   [ -e "$src" ] || continue

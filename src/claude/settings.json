@@ -2,6 +2,9 @@
   "model": "opus[1m]",
   "effortLevel": "high",
   "language": "japanese",
+  "env": {
+    "CLAUDE_CODE_PLUGIN_DIRS": "~/.claude/mods/usage-limits"
+  },
   "hooks": {
     "UserPromptSubmit": [
       {
