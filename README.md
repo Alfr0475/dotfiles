@@ -266,10 +266,11 @@ make iterm2-load    # リポジトリ -> ~/.config/iterm2（設定を戻す）
 | ファイル | 内容 |
 | --- | --- |
 | `CLAUDE.md` | 全プロジェクト共通の行動指針 |
-| `settings.json` | モデルと effort の設定、hook の登録 |
+| `settings.json` | モデルと effort の設定、hook の登録、`env` による Mod の読み込み |
 | `skills/` | 自作スキル（`join-project`, `promote-product`, `verification-items`, 開発フローの `dd-*`） |
 | `agents/` | 自作サブエージェント（`executor`） |
 | `hooks/` | Claude Code の hook から呼ばれるスクリプト |
+| `mods/` | 自作 Mod（`usage-limits`）。`settings.json` の `env.CLAUDE_CODE_PLUGIN_DIRS` で読み込む |
 
 ### サブエージェント
 
@@ -319,6 +320,51 @@ make iterm2-load    # リポジトリ -> ~/.config/iterm2（設定を戻す）
 `--all` で全リポジトリの作業ディレクトリを一覧でき（`ghq list -p` 相当）、
 zsh の `pdd` はこれを peco に渡して cd する。
 `_lib/` には `SKILL.md` が無いのでスキルとしては読み込まれない。
+
+### 使用量の表示（Mod）
+
+`mods/usage-limits` が、プロンプト下のヒント行（`? for shortcuts` などの右）に
+プランの利用上限の使用率とリセット時刻を表示する。
+
+```
+5h 42%（14:00 まで） · 週 63%（10/13(火) 9:00 まで）
+```
+
+| 挙動 | 内容 |
+| --- | --- |
+| 値 | `$.session.usage()` の `rateLimits`（5 時間枠 `five_hour`、週次枠 `seven_day`）。% は切り捨て |
+| 時刻 | ローカル時刻。5 時間枠は今日なら `H:MM`、日付が変わるなら `M/D(曜) H:MM`。週次枠は常に日付付き |
+| 色 | 枠ごとに 80% 以上で `warning`（黄）、95% 以上で `error`（赤）。テーマのキーなのでライト/ダークに追従する |
+| 欠けた枠 | `5h --` / `週 --`。リセット時刻を過ぎた枠も古い値なので `--` にする |
+| 非表示 | 両方の枠が取れないとき（初回応答前、API キー認証など）は行を出さない |
+| 更新 | 応答の完了時（`session.measure`）と 1 分ごと |
+
+対象は CLI と Claude Desktop の Code タブ。VS Code 拡張では Mod が UI を描けないので表示されない。
+
+**読み込みはマーケットプレイスを使わず、`settings.json` の `env` で行う。**
+
+```json
+"env": { "CLAUDE_CODE_PLUGIN_DIRS": "~/.claude/mods/usage-limits" }
+```
+
+`claude plugin install` は `settings.json` に絶対パス入りの `extraKnownMarketplaces` と
+`enabledPlugins` を書き込むため、リポジトリに差分が出て Mac と Dev Container でパスも食い違う。
+`CLAUDE_CODE_PLUGIN_DIRS` は `--plugin-dir` 相当で、Desktop のようにフラグを渡せないアプリでも効く。
+`make claude` が `~/.claude/mods` をリンクするだけなので、インストール状態を持たない。
+
+- **`$HOME/...` は展開されない。必ず `~` で書く**（`~` は Claude Code 自身が展開する）
+- 読み込みのたびに Claude Code が Mod の中へ `.claude-plugin/types/` と `tsconfig.json` を
+  書き込む。バージョン依存の生成物なので `.gitignore` で除外している
+- `make doctor` が設定値と、下記の `validate` / `test` を検証する。コードが壊れても
+  セッション中は黙って表示されないだけなので、ここで気付けるようにしている
+
+```sh
+claude plugin validate --strict src/claude/mods/usage-limits
+claude plugin test src/claude/mods/usage-limits
+```
+
+動作を確認したバージョンは Claude Code 2.1.293。Mods API はリリースごとに変わりうるので、
+壊れたら生成された `.claude-plugin/types/` の型定義を見て直す。
 
 ### セッション名の自動付け替え
 
