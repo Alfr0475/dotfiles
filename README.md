@@ -323,8 +323,8 @@ zsh の `pdd` はこれを peco に渡して cd する。
 
 ### 使用量の表示（Mod）
 
-`mods/usage-limits` が、プロンプト下のヒント行（`? for shortcuts` などの右）に
-プランの利用上限の使用率とリセット時刻を表示する。
+`mods/usage-limits` が、プランの利用上限の使用率とリセット時刻を表示する。
+CLI ではプロンプト下のヒント行（`? for shortcuts` などの右）に、Desktop ではプロンプト上の帯に出す。
 
 ```
 5h 42%（14:00 まで） · 週 63%（10/13(火) 9:00 まで）
@@ -340,6 +340,12 @@ zsh の `pdd` はこれを peco に渡して cd する。
 | 更新 | 応答の完了時（`session.measure`）と 1 分ごと |
 
 対象は CLI と Claude Desktop の Code タブ。VS Code 拡張では Mod が UI を描けないので表示されない。
+
+**Desktop でプロンプト上に出すのは、ヒント行（`PromptHint`）が Desktop では呼ばれないため。**
+公式の reference と型定義には Desktop でも描かれるとあるが、2.1.293 で実測すると Desktop では
+`PromptHint` の `ui.render` が一度も呼ばれず、`AbovePrompt` だけが呼ばれた。表示場所は
+surface で分けている（`PromptHint` は terminal だけ、`AbovePrompt` は desktop だけ）ので、
+将来 Desktop で `PromptHint` が呼ばれるようになっても二重には出ない。帯はアンケート表示中は譲る。
 
 **読み込みはマーケットプレイスを使わず、`settings.json` の `env` で行う。**
 
