@@ -51,8 +51,8 @@ tmux-plugins: ## etc/tmux-plugins.txt の tmux プラグインを ~/.tmux/plugin
 	@bash $(SCRIPTS)/tmux-plugins.sh
 
 .PHONY: claude
-claude: ## Claude Code の設定を ~/.claude に配置する
-	@bash $(SCRIPTS)/claude-install.sh --no-cli
+claude: ## claude CLI（ネイティブ版）を導入し、設定を ~/.claude に配置する
+	@bash $(SCRIPTS)/claude-install.sh
 
 .PHONY: iterm2
 iterm2: ## iTerm2 の設定が無ければリポジトリから復元する（既存は変更しない）

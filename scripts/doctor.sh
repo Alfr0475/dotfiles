@@ -192,6 +192,18 @@ fi
 #------------------------------------------------------------------------------
 log_header "Claude Code"
 #------------------------------------------------------------------------------
+# claude CLI はネイティブ版（~/.local/bin/claude）だけを使う。brew / npm 版が
+# 残っていると自動更新が効かない古い版を掴む原因になるので知らせる。
+if [ -x "$HOME/.local/bin/claude" ]; then
+  log_ok "claude CLI (ネイティブ版) $("$HOME/.local/bin/claude" --version 2>/dev/null | head -1)"
+else
+  log_fail "~/.local/bin/claude が無い -> make claude"
+  note_problem
+fi
+if [ -e "$HOMEBREW_PREFIX/bin/claude" ]; then
+  log_warn "brew 版の claude が残っている -> brew uninstall --cask claude-code"
+  note_problem
+fi
 # ~/.claude は Claude Code 自身が会話ログを書き込むため、ディレクトリ全体は
 # リンクにせず中身を個別にリンクしている（make claude / claude-install.sh）。
 CLAUDE_SRC="$SRC_DIR/claude"

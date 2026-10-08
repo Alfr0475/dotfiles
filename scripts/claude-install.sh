@@ -12,7 +12,7 @@
 # make install からは呼ばない（実環境への適用は明示的に行う）。
 #
 #   claude-install.sh            設定を配置する
-#   claude-install.sh --no-cli   claude CLI の導入を試みない
+#   claude-install.sh --no-cli   claude CLI（ネイティブ版）の導入を試みない
 
 set -euo pipefail
 
@@ -37,30 +37,40 @@ warn() { printf '[claude-install] %s\n' "$*" >&2; }
 [ -d "$CLAUDE_SRC" ] || { warn "not found: $CLAUDE_SRC"; exit 1; }
 
 #------------------------------------------------------------------
-# claude CLI（コンテナ内には入っていないことが多い）
+# claude CLI（ネイティブインストール）
 #------------------------------------------------------------------
+# 公式インストーラで ~/.local/bin/claude に入れる。Node.js が不要で、
+# 本体が自分で自動更新するため brew / npm 経由にはしない。
+# 判定は ~/.local/bin/claude の有無で行う。command -v だと brew / npm 版が
+# 残っているだけで「導入済み」と誤判定し、移行が進まないため。
+CLAUDE_BIN="$HOME/.local/bin/claude"
+
 install_cli() {
-  if command -v claude >/dev/null 2>&1; then
-    log "claude CLI は既にある: $(command -v claude)"
-    return 0
+  if [ -x "$CLAUDE_BIN" ]; then
+    log "claude CLI は既にある: $CLAUDE_BIN"
+  else
+    command -v curl >/dev/null 2>&1 || { warn "curl が無いため claude CLI を導入できない。設定の配置だけ行う。"; return 1; }
+    log "https://claude.ai/install.sh からネイティブ版を導入"
+    # インストーラを一旦落としてから実行する（何が走るか確認できるようにする）
+    local installer
+    installer="$(mktemp)"
+    curl -fsSL https://claude.ai/install.sh -o "$installer"
+    bash "$installer"
+    rm -f "$installer"
+    [ -x "$CLAUDE_BIN" ] || { warn "導入したが $CLAUDE_BIN が見つからない"; return 1; }
   fi
 
-  if command -v npm >/dev/null 2>&1; then
-    log "npm で claude CLI を導入"
-    npm install -g @anthropic-ai/claude-code
-  elif command -v apt-get >/dev/null 2>&1 && command -v curl >/dev/null 2>&1; then
-    log "npm が無いので apt で Node.js を導入"
-    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-    sudo apt-get install -y nodejs
-    npm install -g @anthropic-ai/claude-code
-  elif command -v brew >/dev/null 2>&1; then
-    log "npm が無いので brew で Node.js を導入"
-    brew install node
-    npm install -g @anthropic-ai/claude-code
-  else
-    warn "claude CLI を導入できなかった (npm/apt/brew が無い)。設定の配置だけ行う。"
-    return 1
-  fi
+  # brew / npm 版が残っていると、PATH の順や自動更新の衝突で混乱するので知らせる。
+  # アンインストールは利用中のセッションを壊しうるので自動ではやらない。
+  local other
+  for other in $(type -ap claude | awk '!seen[$0]++'); do
+    [ "$other" = "$CLAUDE_BIN" ] && continue
+    warn "ネイティブ版以外の claude が残っている: $other"
+    case "$other" in
+      */.homebrew/*|*/homebrew/*) warn "  -> brew uninstall --cask claude-code" ;;
+      *) warn "  -> npm uninstall -g @anthropic-ai/claude-code" ;;
+    esac
+  done
 }
 
 if [ "$INSTALL_CLI" -eq 1 ]; then

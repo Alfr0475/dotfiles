@@ -85,7 +85,7 @@ make               install と同じ
 make install       deploy -> brew -> mise -> vim-plugins -> claude を順に実行する
 make vim-plugins   etc/vim-plugins.txt の vim プラグインを ~/.vim/pack に導入する
 make tmux-plugins  etc/tmux-plugins.txt の tmux プラグインを ~/.tmux/plugins に導入する
-make claude        Claude Code の設定を ~/.claude に配置する
+make claude        claude CLI（ネイティブ版）を導入し、設定を ~/.claude に配置する
 make iterm2        iTerm2 の設定が無ければリポジトリから復元する
 make iterm2-save   iTerm2 の設定変更をリポジトリに取り込む
 make iterm2-load   リポジトリの iTerm2 設定を ~/.config/iterm2 に復元する
@@ -361,8 +361,12 @@ Claude Code の自動タイトル生成は **1 セッションにつき 1 回だ
 ディレクトリ全体はリンクにせず中身を個別にリンクする（`make claude`）。
 会話ログ（`projects/`）や認証情報（`.credentials.json`）は配置対象に含めない。
 
-macOS では claude CLI を Homebrew（`cask "claude-code"`）で入れるため、
-`make claude` は `--no-cli` を付けて npm による二重導入を避けている。
+claude CLI は公式のネイティブインストーラ（`https://claude.ai/install.sh`）で
+`~/.local/bin/claude` に入れる（`make claude`）。Node.js が不要で、本体が自動更新するため
+Homebrew の cask や npm は使わない。`~/.local/bin` は `src/.zshenv` で Homebrew より
+前に置いているので、他の版が残っていてもネイティブ版が優先される。
+brew / npm 版が残っていれば `make claude` と `make doctor` が警告する
+（利用中のセッションを壊しうるので削除は手動）。
 
 ### Dev Container で使う
 
@@ -374,4 +378,4 @@ VS Code のユーザー設定に追加すると、コンテナ内でも同じ設
 "remote.containers.dotfiles.installCommand": "~/dotfiles/scripts/claude-install.sh"
 ```
 
-`claude-install.sh` はコンテナ内に claude CLI が無ければ npm / apt / brew で導入を試みる。
+`claude-install.sh` はコンテナ内でも同じネイティブインストーラで claude CLI を導入する（curl が必要）。
