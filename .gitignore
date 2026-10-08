@@ -28,5 +28,9 @@ src/claude/policy-limits.json
 src/claude/skills/synced/
 src/claude/skills/.trash/
 
+# Mod の読み込み時に Claude Code が書き込む型定義と tsconfig（バージョン依存の生成物）
+src/claude/mods/*/.claude-plugin/types/
+src/claude/mods/*/tsconfig.json
+
 # 認証情報はどの階層にあっても除外する
 .credentials.json

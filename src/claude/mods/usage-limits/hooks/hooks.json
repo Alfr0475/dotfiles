@@ -1,0 +1,4 @@
+{
+  "description": "usage-limits の hooks module",
+  "modules": ["./register.js"]
+}
