@@ -9,7 +9,8 @@
 - `etc/links.conf` が「どのファイルをどこへ置くか」の唯一の定義。
   **新しい設定ファイルを追加したら必ずここに登録する**
 - `scripts/` は `Makefile` から呼ばれる。共通処理は `scripts/lib/common.sh`
-- 詳細な設計判断は `README.md` に書いてある。**変更前に該当章を読むこと**
+- 全体の設計は `README.md`、ツールごとの詳細な設計判断は `docs/<ツール>.md` に書いてある。
+  **変更前に該当するファイルを読むこと**
 
 ## 絶対に守るルール
 
@@ -21,7 +22,8 @@ make install && make doctor && make install   # 2 回目に changed が出ない
 ```
 
 - 挙動を変える変更を入れたら `scripts/doctor.sh` に検証を追加する
-- `src/` にファイルを追加したら `etc/links.conf` と `README.md` を同時に更新する
+- `src/` にファイルを追加したら `etc/links.conf` と、`README.md` または `docs/` の該当ファイルを同時に更新する
+  （README には概要だけを書き、仕組みの説明は `docs/` に置く）
   （例外は `src/claude/`。こちらは `make claude` が固定リストで配置するので
   `scripts/claude-install.sh` と `scripts/doctor.sh` の `for item in ...` を直す）
 - リポジトリ内では `.gitignore` / `.gitattributes` という名前を使わない
