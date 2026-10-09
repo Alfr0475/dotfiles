@@ -1,6 +1,6 @@
 # dotfiles
 
-ターミナル環境（zsh / tmux / 各種CLI）を管理するリポジトリ。
+ターミナル環境（zsh / tmux / vim / git / Claude Code）を管理するリポジトリ。
 
 新しい Mac では clone して `make` するだけで環境が揃う。すべてのターゲットは
 何度実行しても同じ結果になる（冪等）ように作っている。
@@ -31,145 +31,7 @@ pdd     # dd-* スキルの生成物ディレクトリを peco で選んで cd�
 
 それ以外は `make` が入れる。
 
-## ツールの役割分担
-
-| 担当 | 対象 | 定義ファイル |
-| --- | --- | --- |
-| **mise** | 言語ランタイム、CLI ツール | `src/mise/config.toml` |
-| **Homebrew** | mise で賄えないもの（GUI アプリ、フォント、ライブラリ、plugin の無い CLI） | `etc/Brewfile` |
-
-mise を主軸にして、Homebrew は補完的に使う。
-
-Homebrew はセキュリティ上の都合で標準の `/opt/homebrew` ではなく **`~/.homebrew`**
-に入れる。公式インストーラは非標準の prefix を受け付けないため、
-`Homebrew/brew` を git clone する方式（[公式ドキュメント](https://docs.brew.sh/Installation#untar-anywhere-unsupported)）を使う。
-
-> **注意**: 非標準 prefix では配布ビルド（bottle）が使えない formula があり、
-> その場合ソースからのビルドになって時間がかかる。重いものは mise 側で入れられないか
-> 先に検討する。
-
-## ディレクトリ構成
-
-```
-.
-├── Makefile              エントリポイント（make help で一覧）
-├── etc/
-│   ├── links.conf        「どのファイルをどこに配置するか」の定義
-│   └── Brewfile          Homebrew の担当分
-├── src/                  設定ファイルの本体。ここが $HOME にリンクされる
-│   ├── .zshenv           PATH と環境変数（全シェルで読まれる）
-│   ├── .zshrc            対話シェル用。rc.d を読み込むだけ
-│   ├── .tmux.conf
-│   ├── zsh/rc.d/         zsh の設定本体。番号順に読まれる
-│   │   ├── 00-options.zsh
-│   │   ├── 10-history.zsh
-│   │   ├── 20-completion.zsh
-│   │   ├── 30-keybind.zsh
-│   │   ├── 40-alias.zsh
-│   │   ├── 50-prompt.zsh
-│   │   ├── 80-plugin.zsh
-│   │   └── 90-tools.zsh  mise 等の `eval "$(cmd init)"` 系
-│   └── mise/config.toml
-└── scripts/
-    ├── lib/common.sh     共通ライブラリ（ログ出力、パス判定）
-    ├── deploy.sh         シンボリックリンクの配置
-    ├── homebrew.sh       Homebrew の導入と Brewfile の反映
-    ├── mise.sh           mise の導入とツールの反映
-    └── doctor.sh         状態確認（何も変更しない）
-```
-
-## make ターゲット
-
-```
-make               install と同じ
-make install       deploy -> brew -> mise -> vim-plugins -> claude を順に実行する
-make vim-plugins   etc/vim-plugins.txt の vim プラグインを ~/.vim/pack に導入する
-make tmux-plugins  etc/tmux-plugins.txt の tmux プラグインを ~/.tmux/plugins に導入する
-make claude        claude CLI（ネイティブ版）を導入し、設定を ~/.claude に配置する
-make iterm2        iTerm2 の設定が無ければリポジトリから復元する
-make iterm2-save   iTerm2 の設定変更をリポジトリに取り込む
-make iterm2-load   リポジトリの iTerm2 設定を ~/.config/iterm2 に復元する
-make deploy        etc/links.conf に従ってシンボリックリンクを配置する
-make check         deploy で何が起きるかを表示するだけ（変更しない）
-make unlink        このリポジトリが張ったリンクだけを削除する
-make brew          Homebrew を導入して etc/Brewfile を反映する
-make mise          mise を導入して src/mise/config.toml を反映する
-make doctor        環境が整っているか確認する
-make update        git pull してから install し直す
-make upgrade       brew / mise のパッケージを新しいバージョンへ上げる
-make brewfile-dump 現在の brew の状態を etc/Brewfile に書き出す
-make list          配置されるリンクの一覧
-make help          ターゲット一覧
-```
-
-## 設定ファイルを追加する
-
-1. `src/` 以下にファイルを置く
-2. `etc/links.conf` に `<src/ からの相対パス>` と `<配置先>` の行を追加する
-3. `make check` で確認してから `make deploy`
-
-配置先はホーム直下でも `~/.config/` 配下でもよい。`links.conf` の右側を書き換えて
-`make deploy` するだけで移動できる。
-
-ただし **`.zshenv` は必ず `~/.zshenv` に置く必要がある**。zsh が最初に読む時点では
-`ZDOTDIR` が未設定で `$HOME` にフォールバックするため。`.zshrc` 以降は `.zshenv` の中で
-`ZDOTDIR` を設定すれば任意の場所に置ける。
-
-## 外部アプリが `~/.zshrc` に追記してきたとき
-
-`~/.zshrc` は `src/.zshrc` へのシンボリックリンクなので、インストーラが `>>` で
-追記するとリポジトリの実体が書き換わる。Docker Desktop は実際に追記してくる。
-
-```zsh
-# The following lines have been added by Docker Desktop to enable Docker CLI completions.
-fpath=(/Users/<user>/.docker/completions $fpath)
-autoload -Uz compinit
-compinit
-# End of Docker CLI completions
-```
-
-補完の定義（`_docker`）自体は重複しないが、`20-completion.zsh` が済ませた
-`compinit` を末尾でもう一度走らせるため以下が起きる。
-
-- 起動が遅くなる（実測 0.03 秒 → 0.05 秒）
-- 既定の dump `~/.zcompdump` が別にでき、`~/.cache/zsh/zcompdump` と二重になる
-- ユーザー名が絶対パスで焼き付き、別のマシンで壊れる
-
-対処は追記を消し、fpath の追加だけを `src/zsh/rc.d/20-completion.zsh` に書くこと。
-`compinit` より前なので 1 回で済む。補完の実体（`~/.docker/completions`）はアプリが
-生成・更新するのでリポジトリには取り込まない。
-
-追記されると `make doctor` が検出する（`src/.zshrc` の末尾が `true` で終わる前提を使う）。
-アプリの更新で再び追記される可能性があるので、気づいたら消す。
-
-fpath に補完を足した直後は `rm ~/.cache/zsh/zcompdump` で dump を作り直す。
-`compinit -C` は既存の dump をそのまま読むため、消さないと新しい補完が効かない。
-
-## 冪等性について
-
-- **シンボリックリンク**: 既に正しい先を指していれば何もしない。別の先を指していれば
-  張り替える。実ファイルがあれば `<name>.bak.<timestamp>` に退避してから張る
-  （退避が発生するのは初回だけ）
-- **PATH**: `typeset -U path` により重複が自動で除去されるので、`.zshenv` を何度
-  読み込んでも PATH は伸び続けない
-- **Homebrew / mise**: 既に入っていればインストールを飛ばす。パッケージの導入は
-  `brew bundle` / `mise install` に任せており、どちらも未導入のものだけを入れる
-
-`make install` を実行した後に `make doctor` が「問題なし」を返すこと、そして
-`make install` をもう一度実行しても `changed` が出ないことを確認するのが確実。
-
-## このマシンだけの設定
-
-リポジトリに入れたくない設定は以下に置く（`.gitignore` 済み）。
-
-| ファイル | 読まれるタイミング |
-| --- | --- |
-| `~/.gitconfig.local` | `.gitconfig` の `[include]` |
-| `~/.zshenv.local` | `.zshenv` の最後 |
-| `~/.zshrc.local` | `.zshrc` の最後 |
-| `~/.tmux.conf.local` | `.tmux.conf` の最後 |
-
-### 新しい Mac で必要な手作業
+## 新しい Mac で必要な手作業
 
 `make` で完結しないものが 3 つある。いずれも `make doctor` が未対応を検出する。
 
@@ -221,6 +83,50 @@ gh auth status      # 反映確認
 未認証だと `gh pr` などが全て失敗する。`make doctor` は hosts.yml の有無だけを見る
 （API を叩くと遅いため、トークンが生きているかまでは見ない）。
 
+## 日々の操作
+
+### make ターゲット
+
+```
+make               install と同じ
+make install       deploy -> brew -> mise -> vim-plugins -> tmux-plugins -> claude -> iterm2 を順に実行する
+make vim-plugins   etc/vim-plugins.txt の vim プラグインを ~/.vim/pack に導入する
+make tmux-plugins  etc/tmux-plugins.txt の tmux プラグインを ~/.tmux/plugins に導入する
+make claude        claude CLI（ネイティブ版）を導入し、設定を ~/.claude に配置する
+make iterm2        iTerm2 の設定が無ければリポジトリから復元する
+make iterm2-save   iTerm2 の設定変更をリポジトリに取り込む
+make iterm2-load   リポジトリの iTerm2 設定を ~/.config/iterm2 に復元する
+make deploy        etc/links.conf に従ってシンボリックリンクを配置する
+make check         deploy で何が起きるかを表示するだけ（変更しない）
+make unlink        このリポジトリが張ったリンクだけを削除する
+make brew          Homebrew を導入して etc/Brewfile を反映する
+make mise          mise を導入して src/mise/config.toml を反映する
+make doctor        環境が整っているか確認する
+make update        git pull してから install し直す
+make upgrade       brew / mise のパッケージを新しいバージョンへ上げる
+make brewfile-dump 現在の brew の状態を etc/Brewfile に書き出す
+make list          配置されるリンクの一覧
+make help          ターゲット一覧
+```
+
+### 設定ファイルを追加する
+
+1. `src/` 以下にファイルを置く
+2. `etc/links.conf` に `<src/ からの相対パス>` と `<配置先>` の行を追加する
+3. `make check` で確認してから `make deploy`
+
+配置先はホーム直下でも `~/.config/` 配下でもよい。`links.conf` の右側を書き換えて
+`make deploy` するだけで移動できる。
+
+ただし **`.zshenv` は必ず `~/.zshenv` に置く必要がある**。zsh が最初に読む時点では
+`ZDOTDIR` が未設定で `$HOME` にフォールバックするため。`.zshrc` 以降は `.zshenv` の中で
+`ZDOTDIR` を設定すれば任意の場所に置ける。
+
+**`src/claude/` だけは例外で `etc/links.conf` を使わない。** `make claude`
+（`scripts/claude-install.sh`）が固定リストで配置するので、ここにファイルを増やすときは
+`scripts/claude-install.sh` と `scripts/doctor.sh` の `for item in ...` を両方直す
+（理由は「[Claude Code の設定](#claude-code-の設定)」）。
+
 ### iTerm2 の設定を更新したとき
 
 本番の場所は `~/.config/iterm2` で、リポジトリ（`src/iterm2/`）はその複製を持つ。
@@ -236,6 +142,93 @@ make iterm2-load    # リポジトリ -> ~/.config/iterm2（設定を戻す）
 
 取り込み忘れは `make doctor` が検出する。`make iterm2` は既存の設定を勝手に
 上書きせず、plist が無いときだけ復元する（どちらが新しいかは自動判断しない）。
+
+## 設計
+
+### ツールの役割分担
+
+| 担当 | 対象 | 定義ファイル |
+| --- | --- | --- |
+| **mise** | 言語ランタイム、CLI ツール | `src/mise/config.toml` |
+| **Homebrew** | mise で賄えないもの（GUI アプリ、フォント、ライブラリ、plugin の無い CLI） | `etc/Brewfile` |
+
+mise を主軸にして、Homebrew は補完的に使う。
+
+Homebrew はセキュリティ上の都合で標準の `/opt/homebrew` ではなく **`~/.homebrew`**
+に入れる。公式インストーラは非標準の prefix を受け付けないため、
+`Homebrew/brew` を git clone する方式（[公式ドキュメント](https://docs.brew.sh/Installation#untar-anywhere-unsupported)）を使う。
+
+> **注意**: 非標準 prefix では配布ビルド（bottle）が使えない formula があり、
+> その場合ソースからのビルドになって時間がかかる。重いものは mise 側で入れられないか
+> 先に検討する。
+
+### ディレクトリ構成
+
+```
+.
+├── Makefile                エントリポイント（make help で一覧）
+├── etc/
+│   ├── links.conf          「どのファイルをどこに配置するか」の定義
+│   ├── Brewfile            Homebrew の担当分
+│   ├── vim-plugins.txt     make vim-plugins が入れる vim プラグイン
+│   └── tmux-plugins.txt    make tmux-plugins が入れる tmux プラグイン
+├── src/                    設定ファイルの本体。ここが $HOME にリンクされる
+│   ├── .zshenv             PATH と環境変数（全シェルで読まれる）
+│   ├── .zshrc              対話シェル用。rc.d を読み込むだけ
+│   ├── .gitconfig
+│   ├── .tigrc
+│   ├── .tmux.conf
+│   ├── zsh/rc.d/           zsh の設定本体。番号順に読まれる
+│   │   ├── 00-options.zsh
+│   │   ├── 05-mise.zsh     mise の有効化。40-alias より先に読む必要がある
+│   │   ├── 10-history.zsh
+│   │   ├── 20-completion.zsh
+│   │   ├── 30-keybind.zsh
+│   │   ├── 40-alias.zsh
+│   │   ├── 50-prompt.zsh
+│   │   ├── 80-plugin.zsh
+│   │   └── 90-tools.zsh    `eval "$(cmd init)"` 系
+│   ├── git/                グローバルな ignore / attributes、config.local.example
+│   ├── vim/                vimrc と conf.d
+│   ├── tmux/               tmux-powerline の設定とテーマ
+│   ├── iterm2/             iTerm2 の plist（リンクではなく複製。make iterm2-save/-load）
+│   ├── mise/config.toml
+│   └── claude/             Claude Code の設定（make claude が ~/.claude に配置）
+└── scripts/
+    ├── lib/common.sh       共通ライブラリ（ログ出力、パス判定）
+    ├── deploy.sh           シンボリックリンクの配置
+    ├── homebrew.sh         Homebrew の導入と Brewfile の反映
+    ├── mise.sh             mise の導入とツールの反映
+    ├── vim-plugins.sh      vim プラグインの導入
+    ├── tmux-plugins.sh     tmux プラグインの導入
+    ├── iterm2.sh           iTerm2 設定の復元・取り込み
+    ├── claude-install.sh   claude CLI の導入と ~/.claude への配置（Dev Container でも使う）
+    └── doctor.sh           状態確認（何も変更しない）
+```
+
+### 冪等性について
+
+- **シンボリックリンク**: 既に正しい先を指していれば何もしない。別の先を指していれば
+  張り替える。実ファイルがあれば `<name>.bak.<timestamp>` に退避してから張る
+  （退避が発生するのは初回だけ）
+- **PATH**: `typeset -U path` により重複が自動で除去されるので、`.zshenv` を何度
+  読み込んでも PATH は伸び続けない
+- **Homebrew / mise**: 既に入っていればインストールを飛ばす。パッケージの導入は
+  `brew bundle` / `mise install` に任せており、どちらも未導入のものだけを入れる
+
+`make install` を実行した後に `make doctor` が「問題なし」を返すこと、そして
+`make install` をもう一度実行しても `changed` が出ないことを確認するのが確実。
+
+### このマシンだけの設定
+
+リポジトリに入れたくない設定は以下に置く（`.gitignore` 済み）。
+
+| ファイル | 読まれるタイミング |
+| --- | --- |
+| `~/.gitconfig.local` | `.gitconfig` の `[include]` |
+| `~/.zshenv.local` | `.zshenv` の最後 |
+| `~/.zshrc.local` | `.zshrc` の最後 |
+| `~/.tmux.conf.local` | `.tmux.conf` の最後 |
 
 ## tmux のステータスライン（tmux-powerline）
 
@@ -271,6 +264,19 @@ make iterm2-load    # リポジトリ -> ~/.config/iterm2（設定を戻す）
 | `agents/` | 自作サブエージェント（`executor`） |
 | `hooks/` | Claude Code の hook から呼ばれるスクリプト |
 | `mods/` | 自作 Mod（`usage-limits`）。`settings.json` の `env.CLAUDE_CODE_PLUGIN_DIRS` で読み込む |
+
+### 配置と CLI の導入
+
+`~/.claude` は Claude Code 自身が会話ログやセッション状態を書き込むため、
+ディレクトリ全体はリンクにせず中身を個別にリンクする（`make claude`）。
+会話ログ（`projects/`）や認証情報（`.credentials.json`）は配置対象に含めない。
+
+claude CLI は公式のネイティブインストーラ（`https://claude.ai/install.sh`）で
+`~/.local/bin/claude` に入れる（`make claude`）。Node.js が不要で、本体が自動更新するため
+Homebrew の cask や npm は使わない。`~/.local/bin` は `src/.zshenv` で Homebrew より
+前に置いているので、他の版が残っていてもネイティブ版が優先される。
+brew / npm 版が残っていれば `make claude` と `make doctor` が警告する
+（利用中のセッションを壊しうるので削除は手動）。
 
 ### サブエージェント
 
@@ -409,17 +415,6 @@ Claude Code の自動タイトル生成は **1 セッションにつき 1 回だ
 `--setting-sources ''` で hook 自体を読ませず、さらに環境変数
 `CLAUDE_SESSION_RETITLE` を立てて子プロセス側の hook を即 return させる。
 
-`~/.claude` は Claude Code 自身が会話ログやセッション状態を書き込むため、
-ディレクトリ全体はリンクにせず中身を個別にリンクする（`make claude`）。
-会話ログ（`projects/`）や認証情報（`.credentials.json`）は配置対象に含めない。
-
-claude CLI は公式のネイティブインストーラ（`https://claude.ai/install.sh`）で
-`~/.local/bin/claude` に入れる（`make claude`）。Node.js が不要で、本体が自動更新するため
-Homebrew の cask や npm は使わない。`~/.local/bin` は `src/.zshenv` で Homebrew より
-前に置いているので、他の版が残っていてもネイティブ版が優先される。
-brew / npm 版が残っていれば `make claude` と `make doctor` が警告する
-（利用中のセッションを壊しうるので削除は手動）。
-
 ### Dev Container で使う
 
 VS Code のユーザー設定に追加すると、コンテナ内でも同じ設定と skills が使える。
@@ -431,3 +426,35 @@ VS Code のユーザー設定に追加すると、コンテナ内でも同じ設
 ```
 
 `claude-install.sh` はコンテナ内でも同じネイティブインストーラで claude CLI を導入する（curl が必要）。
+
+## トラブルシューティング
+
+### 外部アプリが `~/.zshrc` に追記してきたとき
+
+`~/.zshrc` は `src/.zshrc` へのシンボリックリンクなので、インストーラが `>>` で
+追記するとリポジトリの実体が書き換わる。Docker Desktop は実際に追記してくる。
+
+```zsh
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/<user>/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions
+```
+
+補完の定義（`_docker`）自体は重複しないが、`20-completion.zsh` が済ませた
+`compinit` を末尾でもう一度走らせるため以下が起きる。
+
+- 起動が遅くなる（実測 0.03 秒 → 0.05 秒）
+- 既定の dump `~/.zcompdump` が別にでき、`~/.cache/zsh/zcompdump` と二重になる
+- ユーザー名が絶対パスで焼き付き、別のマシンで壊れる
+
+対処は追記を消し、fpath の追加だけを `src/zsh/rc.d/20-completion.zsh` に書くこと。
+`compinit` より前なので 1 回で済む。補完の実体（`~/.docker/completions`）はアプリが
+生成・更新するのでリポジトリには取り込まない。
+
+追記されると `make doctor` が検出する（`src/.zshrc` の末尾が `true` で終わる前提を使う）。
+アプリの更新で再び追記される可能性があるので、気づいたら消す。
+
+fpath に補完を足した直後は `rm ~/.cache/zsh/zcompdump` で dump を作り直す。
+`compinit -C` は既存の dump をそのまま読むため、消さないと新しい補完が効かない。
