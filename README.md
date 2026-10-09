@@ -223,7 +223,7 @@ Homebrew はセキュリティ上の都合で標準の `/opt/homebrew` ではな
 
 | ファイル | 内容 |
 | --- | --- |
-| [docs/zsh.md](docs/zsh.md) | zsh の設定。外部アプリが `~/.zshrc` に追記してきたときの対処 |
+| [docs/zsh.md](docs/zsh.md) | zsh の読み込み順、PATH、rc.d の構成、エイリアス、プロンプト、補完、外部アプリによる追記への対処 |
 | [docs/tmux.md](docs/tmux.md) | tmux のステータスライン（tmux-powerline）とフォント |
 | [docs/iterm2.md](docs/iterm2.md) | iTerm2 の設定をリポジトリと同期する仕組み |
 | [docs/claude.md](docs/claude.md) | Claude Code の設定（サブエージェント、`dd-*` スキル、Mod、hook、Dev Container） |
