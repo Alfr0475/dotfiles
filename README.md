@@ -93,7 +93,8 @@ gh auth status      # 反映確認
 1Password のエージェントがあるマシンでだけ有効になる（貸与PCでは何も変わらない）。
 
 1Password の `設定 > 開発者` で SSH エージェントをオンにしたうえで、
-公開鍵と `~/.ssh/config.local`（取引先のホスト。管理外）を置く。
+「1Password CLI と連携」もオンにしておく。公開鍵と `~/.ssh/config.local`（取引先のホスト）は
+`make install`（`make ssh`）が 1Password から取り出す。
 手順と仕組みは [docs/ssh.md](docs/ssh.md)。
 
 ## 日々の操作
@@ -102,13 +103,15 @@ gh auth status      # 反映確認
 
 ```
 make               install と同じ
-make install       deploy -> brew -> mise -> vim-plugins -> tmux-plugins -> claude -> iterm2 を順に実行する
+make install       deploy -> brew -> mise -> ssh -> vim-plugins -> tmux-plugins -> claude -> iterm2 を順に実行する
 make vim-plugins   etc/vim-plugins.txt の vim プラグインを ~/.vim/pack に導入する
 make tmux-plugins  etc/tmux-plugins.txt の tmux プラグインを ~/.tmux/plugins に導入する
 make claude        claude CLI（ネイティブ版）を導入し、設定を ~/.claude に配置する
 make iterm2        iTerm2 の設定が無ければリポジトリから復元する
 make iterm2-save   iTerm2 の設定変更をリポジトリに取り込む
 make iterm2-load   リポジトリの iTerm2 設定を ~/.config/iterm2 に復元する
+make ssh           1Password から ssh の公開鍵と ~/.ssh/config.local を取り出す（個人 Mac のみ）
+make ssh-save      ~/.ssh/config.local の変更を 1Password に保存する
 make deploy        etc/links.conf に従ってシンボリックリンクを配置する
 make check         deploy で何が起きるかを表示するだけ（変更しない）
 make unlink        このリポジトリが張ったリンクだけを削除する
@@ -200,6 +203,7 @@ Homebrew の prefix はマシンで変わる。管理権限の無い貸与PCは 
     ├── vim-plugins.sh      vim プラグインの導入
     ├── tmux-plugins.sh     tmux プラグインの導入
     ├── iterm2.sh           iTerm2 設定の復元・取り込み
+    ├── ssh.sh              1Password から ssh の公開鍵と config.local を取り出す
     ├── claude-install.sh   claude CLI の導入と ~/.claude への配置（Dev Container でも使う）
     └── doctor.sh           状態確認（何も変更しない）
 ```

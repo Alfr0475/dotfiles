@@ -468,10 +468,18 @@ else
     [ -f "$(expand_home "$f")" ] || missing_pub="$missing_pub $f"
   done
   if [ -n "$missing_pub" ]; then
-    log_warn "IdentityFile の公開鍵が無い (1Password から書き出す):$missing_pub"
+    log_warn "IdentityFile の公開鍵が無い -> make ssh:$missing_pub"
     note_problem
   else
     log_ok "IdentityFile の公開鍵は揃っている"
+  fi
+
+  # 1Password との差分までは見ない（op の呼び出しで承認を求められるため。差分は make ssh が知らせる）
+  if [ -f "$HOME/.ssh/config.local" ]; then
+    log_ok "~/.ssh/config.local がある"
+  else
+    log_warn "~/.ssh/config.local が無い -> make ssh"
+    note_problem
   fi
 fi
 

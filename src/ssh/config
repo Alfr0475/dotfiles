@@ -23,7 +23,7 @@ Match exec "test -S '%d/Library/Group Containers/2BUA8C4S2C.com.1password/t/agen
   IdentitiesOnly yes
 
 Match host github.com,gitlab.com exec "test -S '%d/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock'"
-  IdentityFile ~/.ssh/original.pub
+  IdentityFile ~/.ssh/keys/original.pub
 
 #------------------------------------------------------------------------------
 # マシン固有の設定（リポジトリ管理外）

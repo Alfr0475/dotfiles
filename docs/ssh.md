@@ -20,8 +20,8 @@
 | ファイル | 管理 | 中身 |
 | --- | --- | --- |
 | `~/.ssh/config` | `src/ssh/config` へのリンク | 1Password の切り替え、`Include`、共通の既定値、github.com / gitlab.com |
-| `~/.ssh/config.local` | 管理外（マシン固有） | 取引先のホスト。`IdentityFile` は公開鍵を指す |
-| `~/.ssh/**/*.pub` | 管理外 | `IdentityFile` が指す公開鍵。1Password から書き出す |
+| `~/.ssh/config.local` | 1Password のドキュメント「ssh config.local」 | 取引先のホスト。`IdentityFile` は公開鍵を指す |
+| `~/.ssh/keys/<アイテム名>.pub` | `make ssh` がエージェントから書き出す | `IdentityFile` が指す公開鍵 |
 | 秘密鍵 | 1Password | ディスクには置かない |
 | `~/.config/1Password/ssh/agent.toml` | `src/1password/agent.toml` へのリンク | エージェントが鍵を出す保管庫（「個人」「サーバー」） |
 
@@ -59,6 +59,30 @@ Match exec "test -S '%d/Library/Group Containers/2BUA8C4S2C.com.1password/t/agen
 `IdentitiesOnly yes` でその鍵だけをエージェントに出させる。
 秘密鍵ではなく公開鍵を指すのは、エージェントに対して「この鍵で」と指定するのに公開鍵で足りるため。
 
+### 公開鍵と config.local の配布（make ssh）
+
+`make ssh`（`make install` にも含まれる）が 1Password から次の 2 つを取り出す。
+1Password のソケットが無いマシンでは何もしない。
+
+| 対象 | 取り出し方 | 既にあるとき |
+| --- | --- | --- |
+| 公開鍵 | `ssh-add -L` でエージェントから。`~/.ssh/keys/<アイテム名>.pub` に書く | 内容が違えば書き直す |
+| config.local | `op document get "ssh config.local"` | **上書きしない**。1Password と違えば知らせるだけ |
+
+- **公開鍵のファイル名は 1Password のアイテム名そのもの。** 対応表を別に持たないため。
+  アイテム名を変えたら `config.local` の `IdentityFile` も直す。`/` と空白は使えない
+- 公開鍵は `op item get` ではなくエージェントから取る。`ssh-add -L` はアイテム名を
+  コメントにして公開鍵を返し、承認も要らない。また `op item get` は、取り込んだ
+  `.pem`（AWS 形式）の鍵だと `PEM block contains more than just private key` で失敗する
+- config.local は手元で編集していることがあるので、既存のファイルは上書きしない。
+  手元で直したら `make ssh-save` で 1Password に戻す。1Password 側を正にしたいときは
+  手元を消してから `make ssh`
+- config.local の保管先（アカウント・保管庫）はスクリプトに書かず、サインイン済みの
+  全アカウントからドキュメント名で探す（公開リポジトリに取引先のアカウント名を載せないため）。
+  現在は業務アカウントの「サーバー」保管庫にある
+- `op` は mise で入れる（`src/mise/config.toml`）。1Password の `設定 > 開発者` で
+  「1Password CLI と連携」をオンにしておくと、Touch ID で承認できる
+
 ### Include の位置
 
 `Include` を `Match` / `Host` の直後に書くと、そのブロックの条件付きの読み込みになる
@@ -67,24 +91,28 @@ Match exec "test -S '%d/Library/Group Containers/2BUA8C4S2C.com.1password/t/agen
 
 ## 新しい Mac での手順（個人 Mac のみ）
 
-1. 1Password の `設定 > 開発者` で「SSH エージェントを使用」をオンにする
-2. `make install` で `~/.ssh/config` が配置される
+1. 1Password にサインインし、`設定 > 開発者` で次の 2 つをオンにする
+   - SSH エージェントを使用
+   - 1Password CLI と連携
+2. `make install` を実行する。`~/.ssh/config` と `agent.toml` が配置され、
+   `make ssh` が公開鍵と `config.local` を 1Password から取り出す
    （既存の `~/.ssh/config` は `config.bak.<日時>` に退避される）
-3. 使う鍵の公開鍵を 1Password から書き出し、`~/.ssh/` 以下に置く
-   （`original.pub` と、`config.local` が指すもの）
-4. `~/.ssh/config.local` を置く（1Password に保存したものを使う）
-5. `make doctor` の `ssh` 欄が全て ok になることを確認する
+3. `make doctor` の `ssh` 欄が全て ok になることを確認する
 
 ```sh
 ssh -T git@github.com   # Touch ID を求められ、認証できれば OK
 ```
 
+`signing failed ... communication with agent failed` で失敗したら、1Password の
+承認がキャンセルされたか時間切れになっている。鍵の選択は済んでいるので、もう一度実行して承認する。
+
 ## 鍵を追加するとき
 
 1. 1Password で鍵を作るか取り込む（`新規アイテム > SSH キー`）。
    業務の鍵は「サーバー」保管庫に置く（別の保管庫にするなら `agent.toml` に足す）
-2. 公開鍵を書き出して `~/.ssh/<会社>/<名前>.pub` に置く
-3. `~/.ssh/config.local` の `IdentityFile` にその `.pub` を書く
+   アイテム名がそのまま公開鍵のファイル名になるので、`/` と空白を含めない
+2. `make ssh` で `~/.ssh/keys/<アイテム名>.pub` が書き出される
+3. `~/.ssh/config.local` の `IdentityFile` にその `.pub` を書き、`make ssh-save` で 1Password に保存する
 
 ## make doctor の検証内容
 
@@ -93,3 +121,5 @@ ssh -T git@github.com   # Touch ID を求められ、認証できれば OK
 - `ssh -G github.com` で `IdentityAgent` が 1Password になっている（`Match exec` が効いている）
 - `~/.ssh` に秘密鍵のファイルが残っていない
 - `IdentityFile` が指す公開鍵が全て揃っている
+- `~/.ssh/config.local` がある（1Password との差分までは見ない。`op` の呼び出しで承認を
+  求められるため。差分は `make ssh` が知らせる）

@@ -22,7 +22,7 @@ BREW          := $(shell bash -c '. "$(SCRIPTS)/lib/common.sh" && printf "%s" "$
 .DEFAULT_GOAL := install
 
 .PHONY: install
-install: deploy brew mise vim-plugins tmux-plugins claude iterm2 ## 一括セットアップ（deploy -> brew -> mise -> プラグイン -> claude -> iterm2）
+install: deploy brew mise ssh vim-plugins tmux-plugins claude iterm2 ## 一括セットアップ（deploy -> brew -> mise -> ssh -> プラグイン -> claude -> iterm2）
 	@printf '\n\033[1;32m==> 完了しました。新しいシェルを開いてください（exec $$SHELL）\033[0m\n'
 
 .PHONY: deploy
@@ -44,6 +44,14 @@ brew: ## Homebrew を導入し etc/Brewfile を反映する（prefix は docs/ho
 .PHONY: mise
 mise: ## mise を導入し src/mise/config.toml のツールを入れる
 	@bash $(SCRIPTS)/mise.sh
+
+.PHONY: ssh
+ssh: ## 1Password から ssh の公開鍵と ~/.ssh/config.local を取り出す（1Password の無いマシンは skip）
+	@bash $(SCRIPTS)/ssh.sh
+
+.PHONY: ssh-save
+ssh-save: ## ~/.ssh/config.local の変更を 1Password に保存する
+	@bash $(SCRIPTS)/ssh.sh --save
 
 .PHONY: vim-plugins
 vim-plugins: ## etc/vim-plugins.txt の vim プラグインを ~/.vim/pack に導入する
