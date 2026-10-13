@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><!-- 作業名 --></title>
+<style>
+  :root {
+    --bg: #fbfbfa;
+    --surface: #ffffff;
+    --text: #1f2328;
+    --muted: #656d76;
+    --border: #d8dee4;
+    --accent: #0969da;
+    --accent-soft: #ddf4ff;
+    --changed: #bf5700;
+    --changed-soft: #fff1e5;
+    --rejected: #8c959f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --text: #e6edf3;
+      --muted: #8d96a0;
+      --border: #30363d;
+      --accent: #4493f8;
+      --accent-soft: #121d2f;
+      --changed: #f0883e;
+      --changed-soft: #2b1a0e;
+      --rejected: #6e7681;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    line-height: 1.75;
+  }
+  main { max-width: 960px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  h2 { font-size: 1.2rem; margin: 48px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .meta { color: var(--muted); font-size: .9rem; }
+  .lead {
+    background: var(--accent-soft);
+    border-left: 4px solid var(--accent);
+    padding: 16px 20px;
+    border-radius: 6px;
+    font-size: 1.05rem;
+  }
+  .cards { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .card .id { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--accent); font-weight: 600; }
+  .card h3 { margin: 4px 0 8px; font-size: 1rem; }
+  .card dt { color: var(--muted); font-size: .85rem; margin-top: 8px; }
+  .card dd { margin: 0; }
+  .card .rejected { color: var(--rejected); }
+  .card a { color: var(--accent); font-size: .9rem; }
+  table { width: 100%; border-collapse: collapse; background: var(--surface); }
+  th, td { text-align: left; padding: 8px 10px; border: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: .9rem; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em; }
+  pre { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px; overflow-x: auto; }
+  .figure { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; }
+  .figure svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+  /* SVG 内では fill / stroke に var() を使う: 例 fill="var(--changed-soft)" stroke="var(--changed)" */
+  .figure svg text { fill: var(--text); font-size: 13px; }
+  .legend { color: var(--muted); font-size: .85rem; margin-top: 8px; }
+  .tag-changed { color: var(--changed); font-weight: 600; }
+  details {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+  }
+  summary { cursor: pointer; font-weight: 600; }
+  details[open] summary { margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<main>
+  <h1><!-- 作業名: タイトル --></h1>
+  <p class="meta"><!-- 元にした plan.md のパス / 生成日 --></p>
+
+  <h2>一言でいうと</h2>
+  <p class="lead"><!-- 1〜2 文 --></p>
+
+  <h2>読む前に知っておくこと</h2>
+  <!-- 前提の仕組み・用語 -->
+
+  <h2>全体図</h2>
+  <div class="figure">
+    <!-- インライン SVG。変更箇所は var(--changed) / var(--changed-soft)、既存は var(--border) / var(--surface) -->
+  </div>
+  <p class="legend"><span class="tag-changed">■</span> 今回変更する箇所</p>
+
+  <h2>設計判断</h2>
+  <div class="cards">
+    <article class="card">
+      <div class="id">D-01</div>
+      <h3><!-- 決めたこと --></h3>
+      <dl>
+        <dt>なぜそうなっているか</dt>
+        <dd></dd>
+        <dt>却下した案</dt>
+        <dd class="rejected"></dd>
+      </dl>
+      <!-- 深掘りページがあれば: <a href="D-01.html">詳しく →</a> -->
+    </article>
+  </div>
+
+  <h2>変更対象ファイル</h2>
+  <table>
+    <thead><tr><th>ファイル</th><th>種別</th><th>役割</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>理解チェック</h2>
+  <details>
+    <summary><!-- 問い --></summary>
+    <!-- 答え -->
+  </details>
+</main>
+</body>
+</html>

@@ -1,0 +1,16 @@
+[include]
+	path = ~/.gitconfig.local
+[ghq]
+	root = ~/work/sources/git
+[core]
+	excludesfile = ~/.gitignore
+	attributesfile = ~/.gitattributes
+	autocrlf = input
+	filemode = false
+[alias]
+	st = status --short --branch
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true

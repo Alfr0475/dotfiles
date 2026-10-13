@@ -1,0 +1,28 @@
+#------------------------------------------------------------------------------
+# ~/.gitconfig.local のテンプレート
+#
+# src/.gitconfig の [include] から読み込まれる、マシン固有の git 設定。
+# メールアドレスなどマシン・用途ごとに変わる値を置くため、
+# 実ファイルはリポジトリ管理外（.gitignore の *.local で除外）にしている。
+#
+# 新しい Mac では次のようにコピーして値を埋める:
+#
+#   cp "$(ghq root)"/github.com/koga-s-cr/dotfiles/src/git/config.local.example ~/.gitconfig.local
+#   $EDITOR ~/.gitconfig.local
+#
+# 設定しないと git がホスト名から推測した無効なアドレス
+# (例: user@MacBook-Air.local) がコミット履歴に
+# 永久に記録され、GitHub 上でもアカウントに紐付かないので注意。
+#
+# 反映確認: git config --show-origin --get user.email
+#------------------------------------------------------------------------------
+
+[user]
+	name =
+	email =
+
+# 業務用と個人用でホストごとに使い分けたい場合は、
+# .gitconfig 側で includeIf を使う方法もある。
+#
+# [includeIf "gitdir:~/work/"]
+#     path = ~/.gitconfig.work

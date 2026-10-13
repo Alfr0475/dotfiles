@@ -1,0 +1,47 @@
+# Homebrew の担当分  ->  make brew
+#
+# 方針: 言語ランタイムと CLI ツールは mise (src/mise/config.toml) で管理し、
+#       ここには mise で賄えないものだけを書く。
+#         - GUI アプリ (cask)
+#         - フォント (cask)
+#         - mise に plugin が無い CLI
+#         - 他の formula がリンクするライブラリ類
+#
+# 現状を書き出す:  make brewfile-dump   (etc/Brewfile を上書きする)
+# 反映:            make brew
+#
+# 両マシン共通（docs/homebrew.md）。片方だけで使うものは書かない。
+#
+# 注意: 貸与PC は prefix が ~/.homebrew (非標準) なので配布ビルド(bottle)が使えず、
+#       ソースからのビルドになる formula がある。重いものは mise 側を検討する。
+
+#------------------------------------------------------------------------------
+# CLI (mise で賄えないもの)
+#------------------------------------------------------------------------------
+brew "tmux"                          # ターミナルマルチプレクサ
+brew "reattach-to-user-namespace"    # tmux から macOS のクリップボードを触るため
+brew "tmux-mem-cpu-load"             # tmux-powerline の tmux_mem_cpu_load セグメント用
+brew "ifstat"                        # tmux-powerline の ifstat セグメント用
+brew "tig"                           # git の TUI
+brew "git-lfs"                       # Git LFS（.gitconfig の filter "lfs" が要求する）
+brew "rmtrash"                       # ゴミ箱送りの削除（rm 互換のオプションを取る）
+brew "dfc"                           # df の代替
+brew "coreutils"                     # GNU coreutils (macOS のコマンドは古い)
+brew "source-highlight"              # source-highlight (ソースコードのシンタックスハイライト)
+brew "lesspipe"                      # lesspipe (less の前処理)
+
+#------------------------------------------------------------------------------
+# GUI / フォント
+#------------------------------------------------------------------------------
+cask "font-hackgen"                  # 日本語対応の等幅フォント
+# tmux-powerline のセパレータ字形(U+E0B0 等)に必要。
+# iTerm2 のプロファイルで指定するフォント名は HackGenConsoleNF。
+cask "font-hackgen-nerd"             # powerline / Nerd Font 字形入りの HackGen
+# claude CLI は brew ではなくネイティブ版（make claude）で入れる。
+
+#------------------------------------------------------------------------------
+# VSCode 拡張
+#------------------------------------------------------------------------------
+vscode "alefragnani.project-manager"
+vscode "anthropic.claude-code"
+vscode "ms-ceintl.vscode-language-pack-ja"

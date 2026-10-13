@@ -1,0 +1,6 @@
+{
+  "name": "usage-limits",
+  "version": "0.1.0",
+  "description": "プロンプト下に 5 時間枠と週次枠の使用率とリセット時刻を表示する",
+  "author": { "name": "koga-s-cr" }
+}
