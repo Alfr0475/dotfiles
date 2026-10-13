@@ -434,6 +434,48 @@ else
 fi
 
 #------------------------------------------------------------------------------
+log_header "ssh"
+#------------------------------------------------------------------------------
+# 1Password を使うマシンでだけ検証する（貸与PCには 1Password が無く、鍵も使わない）。
+OP_AGENT_SOCK="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+if [ ! -S "$OP_AGENT_SOCK" ]; then
+  log_skip "1Password の SSH エージェントが無い (このマシンでは鍵を使わない想定)"
+else
+  log_ok "1Password の SSH エージェントが有効"
+
+  # src/ssh/config の Match exec が効いているか（引用符の崩れ等で黙って外れるのを検出する）
+  if ssh -G github.com 2>/dev/null | grep -q '^identityagent .*2BUA8C4S2C\.com\.1password'; then
+    log_ok "ssh は 1Password のエージェントを使う"
+  else
+    log_fail "ssh -G github.com で IdentityAgent が 1Password になっていない"
+    note_problem
+  fi
+
+  # 秘密鍵は 1Password に置く運用なので、~/.ssh に残っていたら知らせる
+  keys="$(grep -rlE -- '-----BEGIN [A-Z ]*PRIVATE KEY-----' "$HOME/.ssh" 2>/dev/null)"
+  if [ -n "$keys" ]; then
+    log_warn "~/.ssh に秘密鍵のファイルが残っている (1Password に移したら消す)"
+    printf '%s\n' "$keys" | sed "s|^$HOME|~|; s/^/          /"
+    note_problem
+  else
+    log_ok "~/.ssh に秘密鍵のファイルが無い"
+  fi
+
+  # IdentityFile が指す公開鍵が揃っているか（無いと ssh は鍵を選べない）
+  missing_pub=""
+  for f in $(cat "$HOME/.ssh/config" "$HOME/.ssh/config.local" 2>/dev/null \
+      | awk 'tolower($1) == "identityfile" { print $2 }' | sort -u); do
+    [ -f "$(expand_home "$f")" ] || missing_pub="$missing_pub $f"
+  done
+  if [ -n "$missing_pub" ]; then
+    log_warn "IdentityFile の公開鍵が無い (1Password から書き出す):$missing_pub"
+    note_problem
+  else
+    log_ok "IdentityFile の公開鍵は揃っている"
+  fi
+fi
+
+#------------------------------------------------------------------------------
 log_header "PATH"
 #------------------------------------------------------------------------------
 # 対話 zsh を起動して、実際にログインシェルで解決される PATH を見る

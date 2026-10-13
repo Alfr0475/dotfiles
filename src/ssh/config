@@ -1,0 +1,49 @@
+# ~/.ssh/config
+#
+# このリポジトリは公開なので、ここには誰が見てもよい設定だけを書く。
+# 取引先のホスト名・IP・ユーザー名などは ~/.ssh/config.local（管理外）に書く。
+#
+# 秘密鍵は 1Password に置き、1Password の SSH エージェント経由で使う。
+# ディスクには公開鍵（*.pub）だけを置き、IdentityFile でそれを指して
+# 「どの鍵を使うか」を選ばせる。詳細は docs/ssh.md。
+#
+# ssh_config は「最初に得た値が勝つ」ので、上から順に
+#   1Password の設定 -> config.local -> 全体の既定値
+# の順に並べる。
+
+#------------------------------------------------------------------------------
+# 1Password の SSH エージェント
+#------------------------------------------------------------------------------
+# エージェントのソケットがあるマシンでだけ有効にする。
+# 1Password を入れていない貸与PCではこのブロックは何もしない。
+Match exec "test -S '%d/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock'"
+  IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+  # エージェントは 1 ホストに鍵を 6 本までしか試さないので、
+  # 各ホストで IdentityFile に指定した鍵だけを出させる。
+  IdentitiesOnly yes
+
+Match host github.com,gitlab.com exec "test -S '%d/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock'"
+  IdentityFile ~/.ssh/original.pub
+
+#------------------------------------------------------------------------------
+# マシン固有の設定（リポジトリ管理外）
+#------------------------------------------------------------------------------
+# 無ければ黙って無視される。
+# 直前の Match の中に入ると条件付きの読み込みになるので、Match all で範囲を閉じてから読む。
+Match all
+Include ~/.ssh/config.local
+
+#------------------------------------------------------------------------------
+# 全ての接続に適用
+#------------------------------------------------------------------------------
+Host *
+  ServerAliveInterval 15
+  ServerAliveCountMax 3
+  TCPKeepAlive yes
+
+Host localhost
+  StrictHostKeyChecking no
+  UserKnownHostsFile=/dev/null
+
+Host github.com gitlab.com
+  User git

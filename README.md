@@ -36,7 +36,7 @@ pdd     # dd-* スキルの生成物ディレクトリを peco で選んで cd�
 
 ## 新しい Mac で必要な手作業
 
-`make` で完結しないものが 3 つある。いずれも `make doctor` が未対応を検出する。
+`make` で完結しないものが 4 つある（4 は個人 Mac のみ）。いずれも `make doctor` が未対応を検出する。
 
 **1. git のユーザー設定**
 
@@ -85,6 +85,16 @@ gh auth status      # 反映確認
 
 未認証だと `gh pr` などが全て失敗する。`make doctor` は hosts.yml の有無だけを見る
 （API を叩くと遅いため、トークンが生きているかまでは見ない）。
+
+**4. ssh の鍵（個人 Mac のみ）**
+
+秘密鍵は 1Password に置き、1Password の SSH エージェント経由で使う。
+リポジトリにもディスクにも秘密鍵は置かない。`~/.ssh/config` は配置されるが、
+1Password のエージェントがあるマシンでだけ有効になる（貸与PCでは何も変わらない）。
+
+1Password の `設定 > 開発者` で SSH エージェントをオンにしたうえで、
+公開鍵と `~/.ssh/config.local`（取引先のホスト。管理外）を置く。
+手順と仕組みは [docs/ssh.md](docs/ssh.md)。
 
 ## 日々の操作
 
@@ -179,6 +189,8 @@ Homebrew の prefix はマシンで変わる。管理権限の無い貸与PCは 
 │   ├── tmux/               tmux-powerline の設定とテーマ
 │   ├── iterm2/             iTerm2 の plist（リンクではなく複製。make iterm2-save/-load）
 │   ├── mise/config.toml
+│   ├── ssh/config          ~/.ssh/config。公開してよい設定だけ（docs/ssh.md）
+│   ├── 1password/agent.toml  1Password の SSH エージェントが鍵を出す保管庫
 │   └── claude/             Claude Code の設定（make claude が ~/.claude に配置）
 └── scripts/
     ├── lib/common.sh       共通ライブラリ（ログ出力、パス判定）

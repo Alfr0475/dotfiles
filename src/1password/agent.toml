@@ -1,0 +1,13 @@
+# 1Password の SSH エージェントが鍵を出す保管庫（~/.config/1Password/ssh/agent.toml）
+#
+# このファイルがあると既定（個人保管庫だけ）が無効になり、ここに書いた保管庫の鍵だけが出る。
+# 保管庫は 1Password 上の表示名どおりに書く。詳細は docs/ssh.md。
+# 1Password を入れていない貸与PCでは読まれない。
+
+# original（GitHub / GitLab など個人の鍵）
+[[ssh-keys]]
+vault = "個人"
+
+# 業務で使うサーバーの鍵
+[[ssh-keys]]
+vault = "サーバー"
