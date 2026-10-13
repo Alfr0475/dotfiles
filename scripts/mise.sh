@@ -38,5 +38,12 @@ fi
 # `mise install` は未導入のバージョンだけ入れるので、そのまま毎回呼んでよい。
 # 「入れる必要があるか」を先に判定しようとすると mise 側のフラグ仕様に依存して
 # 誤判定したときに黙って導入を飛ばすことになるので、判定はせず mise に任せる。
-log_do "mise install"
+# changed かどうかは実行前後の導入済み一覧の差分で判断する（冪等性の確認用）。
+before="$("$MISE_BIN" ls --installed 2>/dev/null || true)"
 "$MISE_BIN" install
+after="$("$MISE_BIN" ls --installed 2>/dev/null || true)"
+if [ "$before" = "$after" ]; then
+  log_ok "設定されたツールは全て導入済み"
+else
+  log_do "mise install"
+fi
