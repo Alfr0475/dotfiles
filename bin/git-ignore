@@ -1,6 +1,0 @@
-#!/bin/bash
-
-. $DOTPATH/etc/lib/common.sh
-
-curl -L -s http://www.gitignore.io/api/$@
-
