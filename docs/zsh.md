@@ -25,10 +25,10 @@ PATH の組み立ては `.zshenv` の `__dotfiles_path_init` 関数にまとめ�
 
 - `typeset -gU path` で重複を除き、左側を優先する。何度呼んでも結果は同じ（冪等）
 - `(N-/)` 修飾子で、存在するディレクトリだけを足す
-- 順序は `~/.local/bin`（mise 本体、claude CLI）→ `~/.homebrew/bin` → 既存の PATH
+- 順序は `~/.local/bin`（mise 本体、claude CLI）→ `$HOMEBREW_PREFIX/bin` → 既存の PATH
 - `MANPATH` の末尾に空要素を置く。これが無いとシステムの man が引けなくなる
 - `brew shellenv` は毎回サブプロセスを起動するので使わず、出力内容を直接書いている。
-  Homebrew の prefix を変えたらここも直す
+  prefix（`~/.homebrew` か `/opt/homebrew`）の判定も `.zshenv` にある（[homebrew.md](homebrew.md)）
 
 mise の shims（`$XDG_DATA_HOME/mise/shims`）はコメントアウトしてある。
 `mise activate` と併用すると、どちらでコマンドが解決されたのか分かりにくくなるため。

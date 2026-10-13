@@ -13,6 +13,9 @@ SHELL   := /bin/bash
 DOTFILES_ROOT := $(patsubst %/,%,$(dir $(realpath $(lastword $(MAKEFILE_LIST)))))
 SCRIPTS       := $(DOTFILES_ROOT)/scripts
 
+# brew の場所はマシンで変わる（~/.homebrew か /opt/homebrew）。判定は common.sh に任せる。
+BREW          := $(shell bash -c '. "$(SCRIPTS)/lib/common.sh" && printf "%s" "$$BREW_BIN"')
+
 # スクリプト側は自身の位置から DOTFILES_ROOT を導出するので export はしない。
 # （外部から与えられた変数に依存させないため）
 
@@ -35,7 +38,7 @@ unlink: ## このリポジトリが張ったシンボリックリンクを削除
 	@bash $(SCRIPTS)/deploy.sh --unlink
 
 .PHONY: brew
-brew: ## Homebrew を ~/.homebrew に導入し etc/Brewfile を反映する
+brew: ## Homebrew を導入し etc/Brewfile を反映する（prefix は docs/homebrew.md）
 	@bash $(SCRIPTS)/homebrew.sh
 
 .PHONY: mise
@@ -77,16 +80,16 @@ update: ## リポジトリを最新にしてから install し直す
 
 .PHONY: upgrade
 upgrade: ## brew / mise のパッケージを新しいバージョンに上げる（破壊的なので手動実行）
-	@$(HOME)/.homebrew/bin/brew update
-	@$(HOME)/.homebrew/bin/brew upgrade
-	@$(HOME)/.homebrew/bin/brew bundle install --file=$(DOTFILES_ROOT)/etc/Brewfile
+	@$(BREW) update
+	@$(BREW) upgrade
+	@$(BREW) bundle install --file=$(DOTFILES_ROOT)/etc/Brewfile
 	@$(HOME)/.local/bin/mise upgrade
 	@bash $(SCRIPTS)/vim-plugins.sh --update
 	@bash $(SCRIPTS)/tmux-plugins.sh --update
 
 .PHONY: brewfile-dump
 brewfile-dump: ## 現在の brew の状態を etc/Brewfile に書き出す（コメントは失われる）
-	@$(HOME)/.homebrew/bin/brew bundle dump --force --file=$(DOTFILES_ROOT)/etc/Brewfile
+	@$(BREW) bundle dump --force --file=$(DOTFILES_ROOT)/etc/Brewfile
 	@echo "etc/Brewfile を上書きしました。git diff で確認してください。"
 
 .PHONY: list

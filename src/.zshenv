@@ -18,12 +18,19 @@ export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 
 #------------------------------------------------------------------------------
-# Homebrew (~/.homebrew)
+# Homebrew
+#
+# 管理権限の無いマシンは ~/.homebrew、それ以外は /opt/homebrew（docs/homebrew.md）。
+# 導入済みの方を使う。判定は scripts/lib/common.sh と揃えること。
+# どちらも未導入なら ~/.homebrew 扱いになるが、PATH には (N-/) で入らないので害は無い。
 #
 # `brew shellenv` は毎回サブプロセスを起動するので、出力内容を直接書いている。
-# prefix を変えた場合はここも直すこと。
 #------------------------------------------------------------------------------
-export HOMEBREW_PREFIX="$HOME/.homebrew"
+if [[ ! -x $HOME/.homebrew/bin/brew && -x /opt/homebrew/bin/brew ]]; then
+  export HOMEBREW_PREFIX=/opt/homebrew
+else
+  export HOMEBREW_PREFIX="$HOME/.homebrew"
+fi
 export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar"
 export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX"
 export HOMEBREW_NO_ENV_HINTS=1

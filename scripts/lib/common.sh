@@ -70,8 +70,32 @@ tilde() {
   esac
 }
 
-# Homebrew のインストール先（固定）
-HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-$HOME/.homebrew}"
+# パイプ + grep -q は pipefail 下で SIGPIPE により誤判定しうるので case で見る
+is_admin() {
+  case " $(id -Gn 2>/dev/null) " in
+    *' admin '*) return 0 ;;
+    *)           return 1 ;;
+  esac
+}
+
+# Homebrew のインストール先。マシンの状態から決める（docs/homebrew.md）。
+#   1. ~/.homebrew に導入済み        -> ~/.homebrew（管理権限の無い貸与PC）
+#   2. /opt/homebrew に導入済み      -> /opt/homebrew
+#   3. 未導入: admin なら /opt/homebrew、それ以外は ~/.homebrew
+# src/.zshenv も 1 -> 2 の順で同じ判定をしている。変えるときは両方直す。
+resolve_homebrew_prefix() {
+  if [ -x "$HOME/.homebrew/bin/brew" ]; then
+    printf '%s\n' "$HOME/.homebrew"
+  elif [ -x /opt/homebrew/bin/brew ]; then
+    printf '%s\n' /opt/homebrew
+  elif is_admin; then
+    printf '%s\n' /opt/homebrew
+  else
+    printf '%s\n' "$HOME/.homebrew"
+  fi
+}
+
+HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-$(resolve_homebrew_prefix)}"
 BREW_BIN="$HOMEBREW_PREFIX/bin/brew"
 export HOMEBREW_PREFIX BREW_BIN
 

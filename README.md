@@ -29,6 +29,9 @@ pdd     # dd-* スキルの生成物ディレクトリを peco で選んで cd�
 - macOS (Apple Silicon)
 - Xcode Command Line Tools (`xcode-select --install`)
 
+管理権限が無くても使える。Homebrew の導入先だけが変わり、管理権限が無ければ
+`~/.homebrew`、あれば `/opt/homebrew` に入る（[docs/homebrew.md](docs/homebrew.md)）。
+
 それ以外は `make` が入れる。
 
 ## 新しい Mac で必要な手作業
@@ -99,7 +102,7 @@ make iterm2-load   リポジトリの iTerm2 設定を ~/.config/iterm2 に復�
 make deploy        etc/links.conf に従ってシンボリックリンクを配置する
 make check         deploy で何が起きるかを表示するだけ（変更しない）
 make unlink        このリポジトリが張ったリンクだけを削除する
-make brew          Homebrew を導入して etc/Brewfile を反映する
+make brew          Homebrew を導入して etc/Brewfile を反映する（prefix は自動判定）
 make mise          mise を導入して src/mise/config.toml を反映する
 make doctor        環境が整っているか確認する
 make update        git pull してから install し直す
@@ -140,13 +143,9 @@ iTerm2 で設定を変えたら `make iterm2-save` でリポジトリに取り�
 
 mise を主軸にして、Homebrew は補完的に使う。
 
-Homebrew はセキュリティ上の都合で標準の `/opt/homebrew` ではなく **`~/.homebrew`**
-に入れる。公式インストーラは非標準の prefix を受け付けないため、
-`Homebrew/brew` を git clone する方式（[公式ドキュメント](https://docs.brew.sh/Installation#untar-anywhere-unsupported)）を使う。
-
-> **注意**: 非標準 prefix では配布ビルド（bottle）が使えない formula があり、
-> その場合ソースからのビルドになって時間がかかる。重いものは mise 側で入れられないか
-> 先に検討する。
+Homebrew の prefix はマシンで変わる。管理権限の無い貸与PCは **`~/.homebrew`**
+（git clone 方式）、管理権限のある Mac は標準の `/opt/homebrew`。`make` が自動で判定する
+（仕組みと 2 台運用の流れは [docs/homebrew.md](docs/homebrew.md)）。
 
 ### ディレクトリ構成
 
@@ -223,6 +222,7 @@ Homebrew はセキュリティ上の都合で標準の `/opt/homebrew` ではな
 
 | ファイル | 内容 |
 | --- | --- |
+| [docs/homebrew.md](docs/homebrew.md) | Homebrew の prefix 判定（`~/.homebrew` / `/opt/homebrew`）と 2 台での運用 |
 | [docs/zsh.md](docs/zsh.md) | zsh の読み込み順、PATH、rc.d の構成、エイリアス、プロンプト、補完、外部アプリによる追記への対処 |
 | [docs/tmux.md](docs/tmux.md) | tmux のステータスライン（tmux-powerline）とフォント |
 | [docs/iterm2.md](docs/iterm2.md) | iTerm2 の設定をリポジトリと同期する仕組み |

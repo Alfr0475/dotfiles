@@ -379,6 +379,13 @@ fi
 #------------------------------------------------------------------------------
 log_header "Homebrew"
 #------------------------------------------------------------------------------
+# prefix はマシンで変わる（docs/homebrew.md）。どちらと判定されたかを示す。
+if is_admin; then _admin_label="管理権限あり"; else _admin_label="管理権限なし"; fi
+log_ok "想定 prefix = $(tilde "$HOMEBREW_PREFIX") ($_admin_label)"
+if [ "$HOMEBREW_PREFIX" = /opt/homebrew ] && ! is_admin && [ ! -x "$BREW_BIN" ]; then
+  log_warn "管理権限が無いので /opt/homebrew には入れられない -> HOMEBREW_PREFIX=~/.homebrew make brew"
+  note_problem
+fi
 if [ ! -x "$BREW_BIN" ]; then
   log_fail "$(tilde "$BREW_BIN") が無い -> make brew"
   note_problem

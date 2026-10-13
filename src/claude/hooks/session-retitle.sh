@@ -237,7 +237,8 @@ def claude_bin():
     found = shutil.which("claude")
     if found:
         return found
-    fallback = os.path.join(os.path.expanduser("~"), ".homebrew", "bin", "claude")
+    # hook は PATH が最小限の環境で走ることがある。claude はネイティブ版（make claude）
+    fallback = os.path.join(os.path.expanduser("~"), ".local", "bin", "claude")
     return fallback if os.path.exists(fallback) else None
 
 

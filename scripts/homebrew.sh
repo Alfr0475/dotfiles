@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
 #
-# Homebrew を ~/.homebrew に導入し、etc/Brewfile の内容を適用する。
+# Homebrew を導入し、etc/Brewfile の内容を適用する。
 #
-# 公式インストーラは /opt/homebrew か /usr/local しか受け付けないため、
-# カスタムprefixでは Homebrew/brew を git clone する方式を使う。
-# 参考: https://docs.brew.sh/Installation#untar-anywhere-unsupported
+# 導入先は common.sh の resolve_homebrew_prefix が決める（docs/homebrew.md）。
+#   /opt/homebrew : 公式インストーラ（sudo が要る。管理権限のあるマシン）
+#   ~/.homebrew   : 公式インストーラは /opt/homebrew か /usr/local しか受け付けないため、
+#                   Homebrew/brew を git clone する方式を使う。
+#                   参考: https://docs.brew.sh/Installation#untar-anywhere-unsupported
 #
-# 注意: 非標準prefixでは配布ビルド(bottle)が使えない formula があり、
+# 注意: ~/.homebrew（非標準prefix）では配布ビルド(bottle)が使えない formula があり、
 #       その場合ソースからのビルドになって時間がかかる。
 
 . "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/common.sh"
 
 BREW_REPO="https://github.com/Homebrew/brew"
+BREW_INSTALLER="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
 BREWFILE="$ETC_DIR/Brewfile"
 
 log_header "Homebrew ($(tilde "$HOMEBREW_PREFIX"))"
@@ -28,6 +31,15 @@ fi
 # ---- 本体の導入 ----
 if [ -x "$BREW_BIN" ]; then
   log_ok "brew は既にインストール済み"
+elif [ "$HOMEBREW_PREFIX" = /opt/homebrew ]; then
+  has curl || die "curl が必要です"
+  log_do "$BREW_INSTALLER で $HOMEBREW_PREFIX にインストール（sudo のパスワードを聞かれる）"
+  # インストーラを一旦落としてから実行する（何が走るか確認できるようにする）
+  installer="$(mktemp)"
+  trap 'rm -f "$installer"' EXIT
+  curl -fsSL "$BREW_INSTALLER" -o "$installer"
+  /bin/bash "$installer"
+  [ -x "$BREW_BIN" ] || die "インストールしたが $BREW_BIN が見つかりません"
 else
   log_do "$BREW_REPO を $(tilde "$HOMEBREW_PREFIX") に clone"
   git clone "$BREW_REPO" "$HOMEBREW_PREFIX"

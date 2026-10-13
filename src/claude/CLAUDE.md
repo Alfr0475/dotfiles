@@ -10,7 +10,7 @@
 | 端末 | iTerm2 + tmux（tmux-powerline） |
 | シェル | zsh（設定は `~/.config/zsh/rc.d/*.zsh`） |
 | ツール管理 | mise が主軸、Homebrew は補完 |
-| Homebrew prefix | **`~/.homebrew`**（`/opt/homebrew` ではない） |
+| Homebrew prefix | **`$HOMEBREW_PREFIX`**。貸与PC（管理権限なし）は `~/.homebrew`、個人Mac は `/opt/homebrew` |
 | EDITOR / LANG | `vim` / `ja_JP.UTF-8` |
 | ghq root | `~/work/sources/git` |
 | dotfiles | `~/work/sources/git/github.com/koga-s-cr/dotfiles`（ghq 管理下） |
@@ -23,8 +23,9 @@
 - **`mise ls` を見ずに `node` / `python` / `ruby` / `go` があると仮定しないこと。**
   グローバルに固定しているランタイムは無い（`src/mise/config.toml` はコメントアウト状態）。
   `not_found_auto_install = false` なので、無いものは自動で入らない。
-- `brew install` を安易に提案しないこと。非標準 prefix のため bottle が使えず
-  ソースビルドになる formula がある。**まず mise で入らないか検討する。**
+- `brew install` を安易に提案しないこと。**まず mise で入らないか検討する。**
+  `~/.homebrew`（貸与PC）では非標準 prefix のため bottle が使えずソースビルドになる
+  formula がある。`/opt/homebrew` を直書きせず `$HOMEBREW_PREFIX` / `brew --prefix` を使う。
 - 対話シェルでは `rm` が `rmtrash`、`ls` が `gls --color=tty`、`df` が `dfc` の
   エイリアスになっている。素の挙動を前提にした説明はしない。
 - GNU coreutils は `g` プレフィックス（`gls`, `gsed`, `gdate`）で入っている。
