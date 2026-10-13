@@ -2,7 +2,7 @@
 
 ## 実行環境（前提として扱うこと）
 
-環境は dotfiles リポジトリ（koga-s-cr/dotfiles）で管理している。以下は推測せず前提としてよい。
+環境は dotfiles リポジトリ（Alfr0475/dotfiles）で管理している。以下は推測せず前提としてよい。
 
 | 項目 | 値 |
 | --- | --- |
@@ -13,7 +13,7 @@
 | Homebrew prefix | **`$HOMEBREW_PREFIX`**。貸与PC（管理権限なし）は `~/.homebrew`、個人Mac は `/opt/homebrew` |
 | EDITOR / LANG | `vim` / `ja_JP.UTF-8` |
 | ghq root | `~/work/sources/git` |
-| dotfiles | `~/work/sources/git/github.com/koga-s-cr/dotfiles`（ghq 管理下） |
+| dotfiles | `~/work/sources/git/github.com/Alfr0475/dotfiles`（ghq 管理下） |
 
 ### コマンド実行時の注意
 
@@ -111,7 +111,7 @@ Dev Container 内で Claude を使うには **VS Code Dotfiles 機能**を使う
 VS Code ユーザー設定（`settings.json`）に追加：
 
 ```json
-"remote.containers.dotfiles.repository": "https://github.com/koga-s-cr/dotfiles",
+"remote.containers.dotfiles.repository": "https://github.com/Alfr0475/dotfiles",
 "remote.containers.dotfiles.targetPath": "~/dotfiles",
 "remote.containers.dotfiles.installCommand": "~/dotfiles/scripts/claude-install.sh"
 ```

@@ -25,7 +25,7 @@ alias ...='cd ../..'
 (( $+commands[dfc] )) && alias df='dfc'
 
 # dotfiles リポジトリへ移動する
-alias dot='cd "$(ghq root)/github.com/koga-s-cr/dotfiles"'
+alias dot='cd "$(ghq root)/github.com/Alfr0475/dotfiles"'
 
 # 状況ボード（board-agent）。常駐しているボードに積む・片付ける。
 #

@@ -5,13 +5,13 @@
 新しい Mac では clone して `make` するだけで環境が揃う。すべてのターゲットは
 何度実行しても同じ結果になる（冪等）ように作っている。
 
-このリポジトリは ghq 管理下（`$(ghq root)/github.com/koga-s-cr/dotfiles`）に置く。
+このリポジトリは ghq 管理下（`$(ghq root)/github.com/Alfr0475/dotfiles`）に置く。
 
 ```sh
 # ghq が無い初回は git clone でよい（配置先は ghq の規約に合わせる）
-git clone git@github.com:koga-s-cr/dotfiles.git \
-  ~/work/sources/git/github.com/koga-s-cr/dotfiles
-cd ~/work/sources/git/github.com/koga-s-cr/dotfiles
+git clone git@github.com:Alfr0475/dotfiles.git \
+  ~/work/sources/git/github.com/Alfr0475/dotfiles
+cd ~/work/sources/git/github.com/Alfr0475/dotfiles
 make
 exec $SHELL -l
 ```
@@ -44,7 +44,7 @@ pdd     # dd-* スキルの生成物ディレクトリを peco で選んで cd�
 テンプレートからコピーして値を埋める。
 
 ```sh
-cp "$(ghq root)"/github.com/koga-s-cr/dotfiles/src/git/config.local.example ~/.gitconfig.local
+cp "$(ghq root)"/github.com/Alfr0475/dotfiles/src/git/config.local.example ~/.gitconfig.local
 $EDITOR ~/.gitconfig.local
 git config --show-origin --get user.email   # 反映確認
 ```

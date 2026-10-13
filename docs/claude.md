@@ -166,7 +166,7 @@ Claude Code の自動タイトル生成は **1 セッションにつき 1 回だ
 VS Code のユーザー設定に追加すると、コンテナ内でも同じ設定と skills が使える。
 
 ```json
-"remote.containers.dotfiles.repository": "https://github.com/koga-s-cr/dotfiles",
+"remote.containers.dotfiles.repository": "https://github.com/Alfr0475/dotfiles",
 "remote.containers.dotfiles.targetPath": "~/dotfiles",
 "remote.containers.dotfiles.installCommand": "~/dotfiles/scripts/claude-install.sh"
 ```
