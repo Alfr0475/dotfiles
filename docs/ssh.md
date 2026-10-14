@@ -6,8 +6,9 @@
   ssh は 1Password の SSH エージェント経由で署名を頼み、使うたびに Touch ID で承認する。
 - **このリポジトリは公開なので、`src/ssh/config` には誰が見てもよい設定だけを書く。**
   取引先のホスト名・IP・ユーザー名は `~/.ssh/config.local`（リポジトリ管理外）に書く。
-- **1Password を使うのは個人 Mac だけ。** 貸与PCには 1Password を入れておらず、
-  ssh の鍵も使わない。同じ `~/.ssh/config` を配っても貸与PC側では何も変わらないようにする。
+- **1Password を使うのは個人 Mac だけ。** 貸与PCには 1Password を入れていない。
+  同じ `~/.ssh/config` を配っても貸与PC側では 1Password の設定が効かないようにし、
+  鍵は従来どおりディスクに置いて `~/.ssh/config.local` で指定する（[貸与PC](#貸与pc1password-なし)）。
 
 以前は秘密鍵を private リポジトリ（Alfr0475/ssh）で管理して `~/.ssh` に clone していたが、
 次の理由でやめた。
@@ -106,6 +107,27 @@ ssh -T git@github.com   # Touch ID を求められ、認証できれば OK
 `signing failed ... communication with agent failed` で失敗したら、1Password の
 承認がキャンセルされたか時間切れになっている。鍵の選択は済んでいるので、もう一度実行して承認する。
 
+## 貸与PC（1Password なし）
+
+1Password のソケットが無いので、`src/ssh/config` の 1Password のブロックは効かず、
+`make ssh` も何もしない。秘密鍵をディスクに置き、`~/.ssh/config.local` を手で書く。
+
+```
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/github
+  IdentitiesOnly yes
+```
+
+- 秘密鍵は `chmod 600` にする（group / other から読めると ssh が拒否する）
+- この `config.local` は 1Password に保存しない（`make ssh-save` は 1Password が無いと動かない）
+- `make install` で既存の `~/.ssh/config` は `config.bak.<日時>` に退避されるので、
+  元の設定はそこから `config.local` へ移す
+- GitHub の鍵がどのアカウントに登録されているかに注意する。`ssh -T git@github.com` の
+  `Hi <アカウント>!` で確かめ、別アカウントのリポジトリに push するならそのアカウントを
+  コラボレーターに加える
+
 ## 鍵を追加するとき
 
 1. 1Password で鍵を作るか取り込む（`新規アイテム > SSH キー`）。
@@ -123,3 +145,9 @@ ssh -T git@github.com   # Touch ID を求められ、認証できれば OK
 - `IdentityFile` が指す公開鍵が全て揃っている
 - `~/.ssh/config.local` がある（1Password との差分までは見ない。`op` の呼び出しで承認を
   求められるため。差分は `make ssh` が知らせる）
+
+1Password のソケットが無いマシン（貸与PC）では、`~/.ssh/config.local` があるときだけ次を確認する
+（無ければ鍵を使わないマシンとして skip）。
+
+- `config.local` の `IdentityFile` が指す鍵が全て揃っている
+- その秘密鍵が group / other から読めない

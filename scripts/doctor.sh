@@ -436,10 +436,44 @@ fi
 #------------------------------------------------------------------------------
 log_header "ssh"
 #------------------------------------------------------------------------------
-# 1Password を使うマシンでだけ検証する（貸与PCには 1Password が無く、鍵も使わない）。
+# 1Password のあるマシンとないマシン（貸与PC）で検証内容を分ける。
+# 貸与PCでは秘密鍵をディスクに置き、~/.ssh/config.local で指定する。
 OP_AGENT_SOCK="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 if [ ! -S "$OP_AGENT_SOCK" ]; then
-  log_skip "1Password の SSH エージェントが無い (このマシンでは鍵を使わない想定)"
+  log_skip "1Password の SSH エージェントが無い (~/.ssh/config.local の鍵を使う)"
+
+  if [ ! -f "$HOME/.ssh/config.local" ]; then
+    log_skip "~/.ssh/config.local が無い (このマシンでは鍵を使わない想定)"
+  else
+    log_ok "~/.ssh/config.local がある"
+
+    # ~/.ssh/config 側の IdentityFile は 1Password 用（Match exec で無効）なので、config.local だけを見る
+    missing_key=""; loose_key=""
+    for f in $(awk 'tolower($1) == "identityfile" { print $2 }' "$HOME/.ssh/config.local" | sort -u); do
+      key="$(expand_home "$f")"
+      if [ ! -f "$key" ]; then
+        missing_key="$missing_key $f"
+      else
+        # 秘密鍵が group / other から読めると ssh が使用を拒否する
+        case "$key" in
+          *.pub) ;;
+          *) [ -n "$(find "$key" -perm +044)" ] && loose_key="$loose_key $f" ;;
+        esac
+      fi
+    done
+    if [ -n "$missing_key" ]; then
+      log_fail "IdentityFile の鍵が無い:$missing_key"
+      note_problem
+    else
+      log_ok "IdentityFile の鍵は揃っている"
+    fi
+    if [ -n "$loose_key" ]; then
+      log_fail "秘密鍵が他人から読める -> chmod 600:$loose_key"
+      note_problem
+    else
+      log_ok "秘密鍵のパーミッションは問題ない"
+    fi
+  fi
 else
   log_ok "1Password の SSH エージェントが有効"
 

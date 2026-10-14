@@ -90,7 +90,8 @@ gh auth status      # 反映確認
 
 秘密鍵は 1Password に置き、1Password の SSH エージェント経由で使う。
 リポジトリにもディスクにも秘密鍵は置かない。`~/.ssh/config` は配置されるが、
-1Password のエージェントがあるマシンでだけ有効になる（貸与PCでは何も変わらない）。
+1Password のエージェントがあるマシンでだけ有効になる。貸与PCでは従来どおりディスク上の鍵を
+`~/.ssh/config.local` で指定する（手で置く）。
 
 1Password の `設定 > 開発者` で SSH エージェントをオンにしたうえで、
 「1Password CLI と連携」もオンにしておく。公開鍵と `~/.ssh/config.local`（取引先のホスト）は

@@ -33,7 +33,7 @@ done
 log_header "ssh (1Password)"
 
 if [ ! -S "$OP_AGENT_SOCK" ]; then
-  log_skip "1Password の SSH エージェントが無い (このマシンでは鍵を使わない想定)"
+  log_skip "1Password の SSH エージェントが無い (~/.ssh/config.local は手で置く)"
   exit 0
 fi
 
