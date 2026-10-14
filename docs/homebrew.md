@@ -30,6 +30,16 @@ Homebrew の導入先（prefix）だけがマシンによって変わり、そ�
 `make upgrade` / `make brewfile-dump` も `common.sh` の判定（`BREW_BIN`）を使う。
 `make doctor` は判定された prefix と、`brew --prefix` がそれに一致するかを表示する。
 
+## 導入と更新を分ける
+
+`make brew` は Brewfile にあって未導入のものを入れるだけで、導入済みのものは更新しない。
+更新は `make upgrade` で手動で行う。
+
+`brew bundle check` / `install` は、既定では古いだけの formula も「満たしていない」と
+扱い、更新しようとする。そこで `make brew`（`scripts/homebrew.sh`）と `make doctor` の
+`check` / `install` には、すべて `--no-upgrade` を付けている。`check` に付け忘れると、
+更新を待つものがあるだけで `make brew` が毎回 `changed` になり、doctor も warn を出す。
+
 ## `~/.homebrew` の注意
 
 公式インストーラは `/opt/homebrew` か `/usr/local` しか受け付けないため、

@@ -401,7 +401,8 @@ else
   fi
 
   if [ -f "$ETC_DIR/Brewfile" ]; then
-    if "$BREW_BIN" bundle check --file="$ETC_DIR/Brewfile" >/dev/null 2>&1; then
+    # make brew と同じく、古いだけのものは問題にしない（更新は make upgrade）
+    if "$BREW_BIN" bundle check --file="$ETC_DIR/Brewfile" --no-upgrade >/dev/null 2>&1; then
       log_ok "Brewfile の内容は全て導入済み"
     else
       log_warn "Brewfile に未導入のものがある -> make brew"

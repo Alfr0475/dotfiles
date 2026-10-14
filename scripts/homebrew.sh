@@ -58,7 +58,9 @@ fi
 
 # brew bundle 自体が冪等（未導入のものだけ入れる）。
 # check で差分が無いと分かる場合は install を丸ごと省略して高速化する。
-if brew bundle check --file="$BREWFILE" >/dev/null 2>&1; then
+# 更新は make upgrade で行うので、install と同じく check も古いだけのものは不足と見なさない
+# （付けないと更新待ちがあるだけで毎回 changed になる）。
+if brew bundle check --file="$BREWFILE" --no-upgrade >/dev/null 2>&1; then
   log_ok "Brewfile の内容は全て導入済み"
 else
   log_do "brew bundle install --file=$(tilde "$BREWFILE")"
