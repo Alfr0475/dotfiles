@@ -1,6 +1,6 @@
 # dotfiles
 
-ターミナル環境（zsh / tmux / vim / git / Claude Code）を管理するリポジトリ。
+ターミナル環境（zsh / tmux / vim / git / Claude Code）と VSCode の設定を管理するリポジトリ。
 `make` だけで新しい Mac に環境が揃うことを保証する。
 
 ## 構成の原則

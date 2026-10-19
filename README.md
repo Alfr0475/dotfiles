@@ -1,6 +1,6 @@
 # dotfiles
 
-ターミナル環境（zsh / tmux / vim / git / Claude Code）を管理するリポジトリ。
+ターミナル環境（zsh / tmux / vim / git / Claude Code）と VSCode の設定を管理するリポジトリ。
 
 新しい Mac では clone して `make` するだけで環境が揃う。すべてのターゲットは
 何度実行しても同じ結果になる（冪等）ように作っている。
@@ -195,6 +195,7 @@ Homebrew の prefix はマシンで変わる。管理権限の無い貸与PCは 
 │   ├── mise/config.toml
 │   ├── ssh/config          ~/.ssh/config。公開してよい設定だけ（docs/ssh.md）
 │   ├── 1password/agent.toml  1Password の SSH エージェントが鍵を出す保管庫
+│   ├── vscode/             VSCode の settings.json / keybindings.json（拡張は Brewfile）
 │   └── claude/             Claude Code の設定（make claude が ~/.claude に配置）
 └── scripts/
     ├── lib/common.sh       共通ライブラリ（ログ出力、パス判定）
@@ -243,4 +244,5 @@ Homebrew の prefix はマシンで変わる。管理権限の無い貸与PCは 
 | [docs/zsh.md](docs/zsh.md) | zsh の読み込み順、PATH、rc.d の構成、エイリアス、プロンプト、補完、外部アプリによる追記への対処 |
 | [docs/tmux.md](docs/tmux.md) | tmux のステータスライン（tmux-powerline）とフォント |
 | [docs/iterm2.md](docs/iterm2.md) | iTerm2 の設定をリポジトリと同期する仕組み |
+| [docs/vscode.md](docs/vscode.md) | VSCode の設定ファイルと拡張の管理 |
 | [docs/claude.md](docs/claude.md) | Claude Code の設定（サブエージェント、`dd-*` スキル、Mod、hook、Dev Container） |

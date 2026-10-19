@@ -19,7 +19,7 @@ if [ ! -f "$LINKS_CONF" ]; then
   log_fail "$LINKS_CONF が無い"
   note_problem
 else
-  while read -r src dest _rest; do
+  while read -r src dest; do
     case "${src:-}" in ''|'#'*) continue ;; esac
     [ -n "${dest:-}" ] || continue
     dest="$(expand_home "$dest")"
@@ -374,6 +374,20 @@ else
     log_warn "リポジトリの複製と差分がある（設定変更が未コミット）-> make iterm2-save"
     note_problem
   fi
+fi
+
+#------------------------------------------------------------------------------
+log_header "VSCode"
+#------------------------------------------------------------------------------
+# 設定ファイルのリンクは上の「シンボリックリンク」で見ている。
+# ここでは Brewfile の vscode 行（拡張）を brew bundle が入れるのに要る code コマンドを見る。
+if [ ! -d "/Applications/Visual Studio Code.app" ] && [ ! -d "$HOME/Applications/Visual Studio Code.app" ]; then
+  log_skip "Visual Studio Code.app が無い"
+elif has code; then
+  log_ok "code -> $(command -v code)"
+else
+  log_fail "code コマンドが PATH に無い（拡張を入れられない） -> VSCode で Shell Command: Install 'code' command in PATH"
+  note_problem
 fi
 
 #------------------------------------------------------------------------------

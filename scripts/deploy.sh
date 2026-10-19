@@ -130,7 +130,9 @@ fi
 [ "$DRY_RUN" -eq 1 ] && log_info "(dry-run: 実際には変更しません)"
 
 count=0
-while read -r src dest _rest; do
+# dest は最後の変数なので行末までが入る（配置先に空白を含められる）。
+# doctor.sh も同じ読み方をしている。変えるときは両方直す。
+while read -r src dest; do
   # 空行 / コメント行を飛ばす
   case "${src:-}" in
     ''|'#'*) continue ;;

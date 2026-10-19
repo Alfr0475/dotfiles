@@ -40,8 +40,9 @@ cask "font-hackgen-nerd"             # powerline / Nerd Font 字形入りの Hac
 # claude CLI は brew ではなくネイティブ版（make claude）で入れる。
 
 #------------------------------------------------------------------------------
-# VSCode 拡張
+# VSCode 拡張（設定は src/vscode/。docs/vscode.md）
 #------------------------------------------------------------------------------
 vscode "alefragnani.project-manager"
 vscode "anthropic.claude-code"
 vscode "ms-ceintl.vscode-language-pack-ja"
+vscode "tuttieee.emacs-mcx"          # Emacs キーバインド。src/vscode/keybindings.json が前提にしている
