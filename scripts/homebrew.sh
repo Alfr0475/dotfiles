@@ -66,3 +66,13 @@ else
   log_do "brew bundle install --file=$(tilde "$BREWFILE")"
   brew bundle install --file="$BREWFILE" --no-upgrade
 fi
+
+# cask が置いたフォントには quarantine が付き、macOS が登録しないことがある（docs/tmux.md）。
+# Homebrew から --no-quarantine が無くなったので、ここで外す。
+for font in "$HOME"/Library/Fonts/HackGen*.ttf; do
+  [ -f "$font" ] || continue
+  if xattr "$font" 2>/dev/null | grep -qx com.apple.quarantine; then
+    log_do "quarantine を外す: $(tilde "$font")"
+    xattr -d com.apple.quarantine "$font"
+  fi
+done

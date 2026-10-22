@@ -182,6 +182,15 @@ else
   if grep -qE 'PATCHED_FONT_IN_USE="?true' "$pl_conf" 2>/dev/null; then
     if ls "$HOME/Library/Fonts/" 2>/dev/null | grep -qiE 'NF-|Nerd|Powerline'; then
       log_ok "パッチ済みフォントあり"
+      # ファイルがあっても macOS に登録されていないことがある（docs/tmux.md）。
+      # iTerm2 のプロファイルが指定する名前で引けるかを見る。
+      font_name="HackGenConsoleNF-Regular"
+      if [ "$(osascript -l JavaScript -e "ObjC.import('AppKit'); \$.NSFont.fontWithNameSize('$font_name', 12).isNil() ? 'nil' : 'ok'" 2>/dev/null)" = ok ]; then
+        log_ok "$font_name を macOS が認識している"
+      else
+        log_warn "$font_name がファイルはあるのに macOS に登録されていない -> docs/tmux.md の手順でフォントキャッシュを作り直す"
+        note_problem
+      fi
     else
       log_warn "パッチ済みフォントが無い（セパレータが豆腐になる）-> make brew"
       note_problem

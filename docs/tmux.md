@@ -16,6 +16,25 @@
 
 `make doctor` が本体・設定・テーマ・依存コマンド・フォントを個別に検証する。
 
-> iTerm2 のプロファイルは `HackGenConsoleForPowerline-Regular` を指定しているが、
-> HackGen 側で命名が変わり現在の後継は `HackGenConsoleNF-Regular`。
-> セパレータが豆腐になる場合はプロファイルのフォントを差し替える。
+iTerm2 のプロファイル（`feel-at-home`）は `HackGenConsoleNF-Regular` を指定している
+（旧名 `HackGenConsoleForPowerline-Regular` の後継）。
+
+## フォントが入っているのに使えない場合
+
+`~/Library/Fonts/` に HackGen の `.ttf` があり、Font Book でファイルを開くと
+「インストール済み」と出るのに、フォント一覧には出ず iTerm2 でも選べないことがある。
+cask がダウンロード時に付けた `com.apple.quarantine` が原因で macOS がフォントを登録せず、
+その結果がフォントキャッシュに残ってしまうため。quarantine を外しただけでは直らない。
+
+- `make brew` は HackGen フォントの quarantine を外す（Homebrew から `--no-quarantine` が
+  無くなったため）
+- `make doctor` は「ファイルがあるか」に加えて `HackGenConsoleNF-Regular` を名前で引けるかを見る
+
+それでも登録されていなければ、ユーザーのフォントキャッシュを作り直して Mac を再起動する
+（消えるのはキャッシュだけで、フォントファイルは残る）。
+
+```sh
+atsutil databases -removeUser
+atsutil server -shutdown
+atsutil server -ping
+```
