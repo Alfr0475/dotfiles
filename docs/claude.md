@@ -161,6 +161,22 @@ Claude Code の自動タイトル生成は **1 セッションにつき 1 回だ
 `--setting-sources ''` で hook 自体を読ませず、さらに環境変数
 `CLAUDE_SESSION_RETITLE` を立てて子プロセス側の hook を即 return させる。
 
+## ログの棚卸し（cclens）
+
+[cclens](https://github.com/lambdalisue/cclens) は `~/.claude` の会話ログと設定を読み、
+使われていない skill や毎セッション読まれる重いファイル、繰り返すツール失敗を洗い出す。
+解析はローカルで完結し、読み取り専用。キャッシュの SQLite は消しても次回再生成される。
+
+mise のレジストリに無いので、mise の `github:` バックエンドで Releases のバイナリを入れる（`make mise`）。
+Homebrew の tap もあるが、mise に寄せる方針に従う。
+
+```sh
+cclens doctor                  # まずこれ。次に見るべきコマンドを教えてくれる
+cclens waste --scope global    # ~/.claude 側の削れる設定
+```
+
+ログが少ないマシンでは結果が薄い。貸与PCのように使い込んだ環境で見る。
+
 ## Dev Container で使う
 
 VS Code のユーザー設定に追加すると、コンテナ内でも同じ設定と skills が使える。
