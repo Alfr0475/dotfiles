@@ -3,6 +3,9 @@
     "CLAUDE_CODE_PLUGIN_DIRS": "~/.claude/mods/usage-limits"
   },
   "model": "opus[1m]",
+  "attribution": {
+    "commit": ""
+  },
   "hooks": {
     "UserPromptSubmit": [
       {
