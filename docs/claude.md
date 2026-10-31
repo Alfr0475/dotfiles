@@ -6,7 +6,7 @@
 | --- | --- |
 | `CLAUDE.md` | 全プロジェクト共通の行動指針 |
 | `settings.json` | モデルと effort の設定、hook の登録、`env` による Mod の読み込み |
-| `skills/` | 自作スキル（`join-project`, `promote-product`, `verification-items`, 開発フローの `dd-*`） |
+| `skills/` | 自作スキル（`join-project`, `verification-items`, 開発フローの `dd-*`） |
 | `agents/` | 自作サブエージェント（`executor`） |
 | `hooks/` | Claude Code の hook から呼ばれるスクリプト |
 | `mods/` | 自作 Mod（`usage-limits`）。`settings.json` の `env.CLAUDE_CODE_PLUGIN_DIRS` で読み込む |
