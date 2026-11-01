@@ -110,6 +110,11 @@ user@host 1-0 $
 - 自作の補完関数は `~/.config/zsh/completions` に置く（`fpath` に入っている）
 - 外部アプリの補完も、`compinit` より前に `20-completion.zsh` で `fpath` に足す
   （例: `~/.docker/completions`）
+- mise の補完（`_mise`）は `mise activate` では入らないので、`make mise` が
+  `mise completion zsh` の出力を `~/.config/zsh/completions/_mise` に書き出す。
+  生成物なのでリポジトリには入れない。候補は実行時に `mise __complete_word__` が出すため
+  mise を上げてもほぼ変わらないが、中身が変わると `make doctor` が warn を出す。
+  書き換えたときは `make mise` が dump も消す
 - `compinit` の dump は `~/.cache/zsh/zcompdump`。24 時間以内に作られたものがあれば `-C` で
   検証を省いて読む。**補完を足した直後は `rm ~/.cache/zsh/zcompdump` で作り直す**
 - 大文字小文字を区別せず補完し、候補が 2 つ以上あるときはメニュー選択になる

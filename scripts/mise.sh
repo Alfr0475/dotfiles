@@ -29,6 +29,24 @@ else
   [ -x "$MISE_BIN" ] || die "インストールしたが $MISE_BIN が見つかりません"
 fi
 
+# ---- zsh の補完 ----
+# mise activate は補完を入れないので、`mise completion zsh` の出力を
+# 20-completion.zsh が fpath に足しているディレクトリへ書き出す。
+# 候補は実行時に `mise __complete_word__` が出すので、mise を上げても
+# ファイルはほぼ変わらない。中身が同じなら書き換えない（冪等）。
+# compinit -C は古い dump を読み続けるので、書き換えたら dump を消す。
+COMPLETION_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/zsh/completions/_mise"
+ZCOMPDUMP="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
+completion="$("$MISE_BIN" completion zsh)"
+if [ -f "$COMPLETION_FILE" ] && [ "$(cat "$COMPLETION_FILE")" = "$completion" ]; then
+  log_ok "$(tilde "$COMPLETION_FILE") は最新"
+else
+  mkdir -p "$(dirname "$COMPLETION_FILE")"
+  printf '%s\n' "$completion" > "$COMPLETION_FILE"
+  rm -f "$ZCOMPDUMP"
+  log_do "$(tilde "$COMPLETION_FILE") を生成"
+fi
+
 # ---- ツールの導入 ----
 if [ ! -f "$MISE_CONFIG" ]; then
   log_skip "$(tilde "$MISE_CONFIG") が無いため install をスキップ (make deploy 済みか確認)"

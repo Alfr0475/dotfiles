@@ -455,6 +455,18 @@ else
     log_warn "mise ls --missing の実行に失敗した: $missing"
     note_problem
   fi
+
+  # zsh の補完は make mise が書き出す。mise の更新で生成内容が変わったら作り直す
+  mise_completion="${XDG_CONFIG_HOME:-$HOME/.config}/zsh/completions/_mise"
+  if [ ! -f "$mise_completion" ]; then
+    log_warn "$(tilde "$mise_completion") が無い -> make mise"
+    note_problem
+  elif [ "$(cat "$mise_completion")" != "$("$MISE_BIN" completion zsh 2>/dev/null)" ]; then
+    log_warn "$(tilde "$mise_completion") が古い -> make mise"
+    note_problem
+  else
+    log_ok "zsh の補完 ($(tilde "$mise_completion"))"
+  fi
 fi
 
 #------------------------------------------------------------------------------
