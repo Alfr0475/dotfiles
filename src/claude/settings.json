@@ -5,6 +5,14 @@
   "attribution": {
     "commit": ""
   },
+  "permissions": {
+    "allow": [
+      "mcp__multi-account-mcp__list_accounts",
+      "mcp__multi-account-mcp__drive_search",
+      "mcp__multi-account-mcp__drive_read",
+      "mcp__multi-account-mcp__sheets_read"
+    ]
+  },
   "hooks": {
     "UserPromptSubmit": [
       {
