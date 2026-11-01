@@ -36,7 +36,7 @@ pdd     # dd-* スキルの生成物ディレクトリを peco で選んで cd�
 
 ## 新しい Mac で必要な手作業
 
-`make` で完結しないものが 4 つある（4 は個人 Mac のみ）。いずれも `make doctor` が未対応を検出する。
+`make` で完結しないものが 5 つある（4 は個人 Mac のみ）。1〜4 は `make doctor` が未対応を検出する（5 は検出できないので `op account list` で確かめる）。
 
 **1. git のユーザー設定**
 
@@ -97,6 +97,23 @@ gh auth status      # 反映確認
 「1Password CLI と連携」もオンにしておく。公開鍵と `~/.ssh/config.local`（取引先のホスト）は
 `make install`（`make ssh`）が 1Password から取り出す。
 手順と仕組みは [docs/ssh.md](docs/ssh.md)。
+
+**5. ターミナルのフルディスクアクセス**
+
+`op` は 1Password アプリのデータ領域（`~/Library/Group Containers/2BUA8C4S2C.com.1password/`）
+にある通信口でアプリと連携する。macOS はほかのアプリのデータ領域をアプリごとに保護しているので、
+ターミナルに権限が無いと、`op` は「1Password CLI 用のアカウントが無い」と言って失敗する
+（`op account list` が空になる。「1Password CLI と連携」がオンでも起きる）。
+
+`システム設定 > プライバシーとセキュリティ > フルディスクアクセス` に iTerm2 を追加してオンにし、
+iTerm2 を起動し直す。tmux のサーバーは古い権限のまま動き続けるので `tmux kill-server` してから入り直す。
+
+```sh
+op account list     # 1Password のアカウントが出れば反映済み
+```
+
+権限はアプリごとに違う。VS Code を `code` コマンドで起動した場合も、ターミナルを直したあとで
+VS Code の中の `op` が同じ症状になったら、VS Code も起動し直す。
 
 ## 日々の操作
 
