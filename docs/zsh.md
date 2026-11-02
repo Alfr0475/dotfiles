@@ -120,6 +120,11 @@ user@host 1-0 $
 - `compinit` の dump は `~/.cache/zsh/zcompdump`。24 時間以内に作られたものがあれば `-C` で
   検証を省いて読む。**補完を足した直後は `rm ~/.cache/zsh/zcompdump` で作り直す**
 - 大文字小文字を区別せず補完し、候補が 2 つ以上あるときはメニュー選択になる
+- ghq の補完（`_ghq`）は生成コマンドが無く、配布物に `misc/zsh/_ghq` として同梱されている。
+  `make mise` がこれを `~/.config/zsh/completions/_ghq` にコピーする。インストール先は
+  バージョンを含むパスで、古い版は mise が自動で消すため、fpath に足したりリンクしたりしない。
+  オプションはファイルに直接書かれているので、ghq を上げると古くなる。
+  `make upgrade` は最後に `scripts/mise.sh` を呼んで作り直し、取り残しは `make doctor` が warn を出す
 
 ## このマシンだけの設定
 

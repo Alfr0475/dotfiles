@@ -467,6 +467,20 @@ else
   else
     log_ok "zsh の補完 ($(tilde "$mise_completion"))"
   fi
+  # ghq の補完は配布物の _ghq を make mise がコピーしている。ghq を上げると古くなる
+  ghq_src="$(mise_ghq_completion)"
+  ghq_completion="${XDG_CONFIG_HOME:-$HOME/.config}/zsh/completions/_ghq"
+  if [ -z "$ghq_src" ]; then
+    log_skip "ghq の補完 (ghq が未導入)"
+  elif [ ! -f "$ghq_completion" ]; then
+    log_warn "$(tilde "$ghq_completion") が無い -> make mise"
+    note_problem
+  elif [ "$(cat "$ghq_completion")" != "$(cat "$ghq_src")" ]; then
+    log_warn "$(tilde "$ghq_completion") が古い -> make mise"
+    note_problem
+  else
+    log_ok "zsh の補完 ($(tilde "$ghq_completion"))"
+  fi
   # _mise は候補を出すのに usage CLI を呼ぶ。無いと補完のたびにエラーになる
   if "$MISE_BIN" which usage >/dev/null 2>&1; then
     log_ok "usage (補完が使う)"

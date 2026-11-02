@@ -102,3 +102,11 @@ export HOMEBREW_PREFIX BREW_BIN
 # mise のインストール先（固定）
 MISE_BIN="${MISE_BIN:-$HOME/.local/bin/mise}"
 export MISE_BIN
+
+# mise で入れた ghq に同梱の zsh 補完のパス。無ければ何も出さない。
+# 展開先のディレクトリ名（ghq_darwin_arm64 など）は配布物次第なので find で探す
+mise_ghq_completion() {
+  local dir
+  dir="$("$MISE_BIN" where ghq 2>/dev/null)" || return 0
+  find "$dir" -path '*/misc/zsh/_ghq' -type f 2>/dev/null | head -1
+}

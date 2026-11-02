@@ -92,6 +92,7 @@ upgrade: ## brew / mise のパッケージを新しいバージョンに上げ�
 	@$(BREW) upgrade
 	@$(BREW) bundle install --file=$(DOTFILES_ROOT)/etc/Brewfile
 	@$(HOME)/.local/bin/mise upgrade
+	@bash $(SCRIPTS)/mise.sh   # 上げたツールに合わせて zsh の補完を作り直す
 	@bash $(SCRIPTS)/vim-plugins.sh --update
 	@bash $(SCRIPTS)/tmux-plugins.sh --update
 

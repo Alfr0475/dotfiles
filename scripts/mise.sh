@@ -48,20 +48,36 @@ else
 fi
 
 # ---- zsh の補完 ----
-# mise activate は補完を入れないので、`mise completion zsh` の出力を
-# 20-completion.zsh が fpath に足しているディレクトリへ書き出す。
-# 候補は実行時に `mise __complete_word__` が出すので、mise を上げても
-# ファイルはほぼ変わらない。中身が同じなら書き換えない（冪等）。
+# mise activate は補完を入れないので、20-completion.zsh が fpath に足している
+# ディレクトリへ書き出す。中身が同じなら書き換えない（冪等）。
 # compinit -C は古い dump を読み続けるので、書き換えたら dump を消す。
-# 出力は usage の有無で変わるので、usage を入れるツールの導入より後に置く。
-COMPLETION_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/zsh/completions/_mise"
+# ツールの導入（usage / ghq）より後に置く。
+COMPLETION_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh/completions"
 ZCOMPDUMP="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
-completion="$("$MISE_BIN" completion zsh)"
-if [ -f "$COMPLETION_FILE" ] && [ "$(cat "$COMPLETION_FILE")" = "$completion" ]; then
-  log_ok "$(tilde "$COMPLETION_FILE") は最新"
+
+# install_completion <ファイル名> <中身>
+install_completion() {
+  local file="$COMPLETION_DIR/$1"
+  if [ -f "$file" ] && [ "$(cat "$file")" = "$2" ]; then
+    log_ok "$(tilde "$file") は最新"
+  else
+    mkdir -p "$COMPLETION_DIR"
+    printf '%s\n' "$2" > "$file"
+    rm -f "$ZCOMPDUMP"
+    log_do "$(tilde "$file") を生成"
+  fi
+}
+
+# 候補は実行時に `mise __complete_word__` が出すので、mise を上げても
+# ファイルはほぼ変わらない。出力は usage の有無で変わる。
+install_completion _mise "$("$MISE_BIN" completion zsh)"
+
+# ghq は生成コマンドを持たず、配布物に misc/zsh/_ghq が同梱されている。
+# インストール先はバージョンを含み、古い版は自動で消えるので、
+# fpath に足したりリンクしたりせずコピーする。
+ghq_completion="$(mise_ghq_completion)"
+if [ -n "$ghq_completion" ]; then
+  install_completion _ghq "$(cat "$ghq_completion")"
 else
-  mkdir -p "$(dirname "$COMPLETION_FILE")"
-  printf '%s\n' "$completion" > "$COMPLETION_FILE"
-  rm -f "$ZCOMPDUMP"
-  log_do "$(tilde "$COMPLETION_FILE") を生成"
+  log_skip "ghq の補完が見つからない (ghq が未導入)"
 fi
