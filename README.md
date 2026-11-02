@@ -197,9 +197,9 @@ Homebrew の prefix はマシンで変わる。管理権限の無い貸与PCは 
 │   ├── .tmux.conf
 │   ├── zsh/rc.d/           zsh の設定本体。番号順に読まれる
 │   │   ├── 00-options.zsh
-│   │   ├── 05-mise.zsh     mise の有効化。40-alias より先に読む必要がある
 │   │   ├── 10-history.zsh
 │   │   ├── 20-completion.zsh
+│   │   ├── 25-mise.zsh     mise の有効化。compinit の後、30-keybind / 40-alias より先に読む
 │   │   ├── 30-keybind.zsh
 │   │   ├── 40-alias.zsh
 │   │   ├── 50-prompt.zsh

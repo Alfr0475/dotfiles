@@ -43,9 +43,9 @@ cron や GUI アプリなど非対話の環境で mise のツールが必要に�
 | ファイル | 内容 |
 | --- | --- |
 | `00-options.zsh` | `setopt`（`AUTO_CD`、`AUTO_PUSHD`、`EXTENDED_GLOB`、`GLOB_DOTS` など） |
-| `05-mise.zsh` | `mise activate zsh` |
 | `10-history.zsh` | ヒストリ。`$XDG_STATE_HOME/zsh/history` に 10 万件。シェル間で共有し、重複は古い方を消す |
 | `20-completion.zsh` | `fpath` の追加、`compinit`、補完の `zstyle` |
+| `25-mise.zsh` | `mise activate zsh` |
 | `30-keybind.zsh` | emacs キーバインド。`^P`/`^N` で前方一致のヒストリ検索、`^R` で peco によるヒストリ検索 |
 | `40-alias.zsh` | エイリアスと関数（下表） |
 | `50-prompt.zsh` | プロンプト（2 行。下記） |
@@ -54,10 +54,13 @@ cron や GUI アプリなど非対話の環境で mise のツールが必要に�
 
 **順序に意味があるところ**
 
-- `05-mise` は `40-alias` より前に置く。peco や ghq は mise 管理で、`mise activate` するまで
-  PATH に無い。`40-alias` はコマンドの有無を見てからエイリアスを定義するため、
-  順序が逆だと、コマンドは入っているのにエイリアスが定義されない
-- `05-mise` は `20-completion` の `compinit` よりも前にある。mise が `fpath` に補完を足す場合に効く
+- `25-mise` は `30-keybind` と `40-alias` より前に置く。peco や ghq は mise 管理で、
+  `mise activate` するまで PATH に無い。`30-keybind`（`^R` の peco）と `40-alias` は
+  コマンドの有無を見てから定義するため、順序が逆だと、コマンドは入っているのに定義されない
+- `25-mise` は `20-completion` の `compinit` より後に置く。`mise activate` は mise 管理の
+  ツール（`usage` など）の補完を `compdef` で登録し、`compdef` が無ければ自分で
+  `compinit -i` を既定の dump（`~/.zcompdump`）で走らせる。前に置くと `compinit` が二重に走る
+  （以前は 05 にあり、mise 2026.10 系で `usage` を入れたときにこれが起きた）
 - `90-tools` の `gh completion` は `compdef` を使うので、`compinit` より後に読む
 
 00〜50 の `setopt` には「あえて入れないもの」もコメントで残してある。
@@ -117,14 +120,14 @@ user@host 1-0 $
   書き換えたときは `make mise` が dump も消す
 - `_mise` は候補を出すときに `usage` CLI を呼ぶ。無いと補完のたびに
   `usage CLI not found` になるので、`usage` を mise のグローバル設定に入れている
-- `compinit` の dump は `~/.cache/zsh/zcompdump`。24 時間以内に作られたものがあれば `-C` で
-  検証を省いて読む。**補完を足した直後は `rm ~/.cache/zsh/zcompdump` で作り直す**
-- 大文字小文字を区別せず補完し、候補が 2 つ以上あるときはメニュー選択になる
 - ghq の補完（`_ghq`）は生成コマンドが無く、配布物に `misc/zsh/_ghq` として同梱されている。
   `make mise` がこれを `~/.config/zsh/completions/_ghq` にコピーする。インストール先は
   バージョンを含むパスで、古い版は mise が自動で消すため、fpath に足したりリンクしたりしない。
   オプションはファイルに直接書かれているので、ghq を上げると古くなる。
   `make upgrade` は最後に `scripts/mise.sh` を呼んで作り直し、取り残しは `make doctor` が warn を出す
+- `compinit` の dump は `~/.cache/zsh/zcompdump`。24 時間以内に作られたものがあれば `-C` で
+  検証を省いて読む。**補完を足した直後は `rm ~/.cache/zsh/zcompdump` で作り直す**
+- 大文字小文字を区別せず補完し、候補が 2 つ以上あるときはメニュー選択になる
 
 ## このマシンだけの設定
 

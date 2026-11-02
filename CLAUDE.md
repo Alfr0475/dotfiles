@@ -29,8 +29,9 @@ make install && make doctor && make install   # 2 回目に changed が出ない
 - リポジトリ内では `.gitignore` / `.gitattributes` という名前を使わない
   （git がこのリポジトリ自身の設定として解釈するため `git/ignore` `git/attributes`）
 - `.zshenv` の配置先は `~/.zshenv` から動かせない（zsh が読む時点で `ZDOTDIR` 未設定）
-- `src/zsh/rc.d/` の番号は読み込み順。特に `05-mise.zsh` が `40-alias.zsh` より
-  先にある理由（mise 管理コマンドの存在判定）を壊さないこと
+- `src/zsh/rc.d/` の番号は読み込み順。特に `25-mise.zsh` が `20-completion.zsh` より
+  後（compinit の二重実行を防ぐ）で、`30-keybind.zsh` / `40-alias.zsh` より先
+  （mise 管理コマンドの存在判定）にある理由を壊さないこと
 - 秘密情報・マシン固有の値はコミットしない（`*.local` 側に置く）
 - `make brewfile-dump` は Brewfile のコメントを消す。実行後は差分を必ず確認する
 
