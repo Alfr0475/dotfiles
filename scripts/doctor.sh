@@ -467,6 +467,13 @@ else
   else
     log_ok "zsh の補完 ($(tilde "$mise_completion"))"
   fi
+  # _mise は候補を出すのに usage CLI を呼ぶ。無いと補完のたびにエラーになる
+  if "$MISE_BIN" which usage >/dev/null 2>&1; then
+    log_ok "usage (補完が使う)"
+  else
+    log_warn "usage が無く mise の補完が動かない -> make mise"
+    note_problem
+  fi
 fi
 
 #------------------------------------------------------------------------------

@@ -26,6 +26,7 @@ ghq = "latest"
 gh = "latest"      # GitHub CLI（ghq とは別物。PR / issue の操作）
 op = "latest"      # 1Password CLI（make ssh が config.local と公開鍵を書き出す。docs/ssh.md）
 "github:lambdalisue/cclens" = "latest"  # Claude Code のログ解析（docs/claude.md）
+usage = "latest"   # mise の zsh 補完（_mise）が実行時に呼ぶ（docs/zsh.md）
 
 [settings]
 # .tool-versions / mise.toml を自動で信頼しない（意図しないツール実行を防ぐ）

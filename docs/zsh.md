@@ -115,6 +115,8 @@ user@host 1-0 $
   生成物なのでリポジトリには入れない。候補は実行時に `mise __complete_word__` が出すため
   mise を上げてもほぼ変わらないが、中身が変わると `make doctor` が warn を出す。
   書き換えたときは `make mise` が dump も消す
+- `_mise` は候補を出すときに `usage` CLI を呼ぶ。無いと補完のたびに
+  `usage CLI not found` になるので、`usage` を mise のグローバル設定に入れている
 - `compinit` の dump は `~/.cache/zsh/zcompdump`。24 時間以内に作られたものがあれば `-C` で
   検証を省いて読む。**補完を足した直後は `rm ~/.cache/zsh/zcompdump` で作り直す**
 - 大文字小文字を区別せず補完し、候補が 2 つ以上あるときはメニュー選択になる
