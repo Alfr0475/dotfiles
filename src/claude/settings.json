@@ -10,7 +10,8 @@
       "mcp__multi-account-mcp__list_accounts",
       "mcp__multi-account-mcp__drive_search",
       "mcp__multi-account-mcp__drive_read",
-      "mcp__multi-account-mcp__sheets_read"
+      "mcp__multi-account-mcp__sheets_read",
+      "Bash(~/.claude/hooks/session-title:*)"
     ]
   },
   "hooks": {
@@ -20,6 +21,11 @@
           {
             "type": "command",
             "command": "/usr/bin/curl -m 1 -sf -o /dev/null -X POST http://127.0.0.1:7788/api/hooks/claude -H 'content-type: application/json' --data-binary @- || true",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude/hooks/session-title\" --hook || true",
             "timeout": 5
           }
         ]
@@ -32,11 +38,6 @@
             "type": "command",
             "command": "/usr/bin/curl -m 1 -sf -o /dev/null -X POST http://127.0.0.1:7788/api/hooks/claude -H 'content-type: application/json' --data-binary @- || true",
             "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "\"$HOME/.claude/hooks/session-retitle.sh\" || true",
-            "timeout": 10
           }
         ]
       }

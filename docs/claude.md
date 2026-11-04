@@ -126,40 +126,43 @@ claude plugin test src/claude/mods/usage-limits
 
 ## セッション名の自動付け替え
 
-`hooks/session-retitle.sh`（`Stop` hook）が、直近の会話に合わせて
-`/resume` 一覧のセッション名を付け替える。
+`hooks/session-title` が、セッション名を `目的 ／ 今の段階` の形に保つ。**名前を考えるのは
+セッションの中の Claude 自身**で、hook は毎ターン材料と変え方を知らせるだけ。命名規則は
+`src/claude/CLAUDE.md` の「セッション名」に書いてある。設計の経緯は ideas-vault の
+`inbox/202611-セッション名の自動リネーム.md`。
 
-Claude Code の自動タイトル生成は **1 セッションにつき 1 回だけ**で、最初の
-プロンプトがそのままタイトルとして残る。会話中に話題が移ると一覧から目的の
-セッションを見つけられないため、外から付け替えている。
+| 役割 | 呼び方 | 内容 |
+| --- | --- | --- |
+| hook | `session-title --hook`（`UserPromptSubmit`） | 今の名前、同じリポジトリの最近のセッション名（10 件）、名前の変え方を `additionalContext` で知らせる |
+| コマンド | `session-title "<名前>"` | CLI・VSCode のセッションで Claude が Bash から呼ぶ。transcript に `custom-title` を書き足す |
 
-タイトルは会話ログ（`~/.claude/projects/*/<session-id>.jsonl`）への追記で表現され、
-優先順位は `custom-title` > `ai-title` > `summary` > 最初のプロンプト。この hook は
-`custom-title` を追記する。Claude Code 側も追記を読み直して採用するため、
-実行中のセッションのプロンプト表示にも反映される。
+**名前の届け先は画面で違う。** `CLAUDE_CODE_ENTRYPOINT` で切り替える。
 
-**追記しただけでは一覧に出ない。** セッション一覧は転写ログ全体を読まず、
-**先頭 64KB と末尾 64KB** しか見ない（Claude Code 内の `$I = 65536`）。追記した
-タイトルはその後の会話でこの窓から押し出されるため、末尾から 32KB 以上離れたら
-同じタイトルを末尾へ再追記して窓の中へ戻す（モデルは呼ばない）。Claude Code 自身が
-`last-prompt` や `ai-title` を延々と再追記しているのも同じ理由。
+- デスクトップアプリ（`claude-desktop`）: 名前の正本はアプリにある。transcript に書いても
+  次のターンでアプリに書き直されるので、Claude にアプリのツール
+  `mcp__ccd_session_mgmt__set_session_title` で変えさせる。コマンドは拒否する
+- CLI（`cli`）・VSCode 拡張（`claude-vscode`）: 一覧は transcript の `custom-title` を読むので、
+  コマンドで書き足せば届く
+- それ以外（`claude -p` など）: 何もしない
 
-| 挙動 | 内容 |
-| --- | --- |
-| 発火 | 応答が終わるたび（`Stop`）。判定だけ同期で行い、生成はバックグラウンド |
-| 間隔 | 前回更新から 10 分以上、かつ前回以降にユーザー発言が 2 回以上 |
-| 窓の維持 | 発火ごとに位置を確認し、末尾 32KB より離れていたら再追記する |
-| 初回 | ユーザー発言が 3 回たまるまでは付け替えない |
-| モデル | `claude-haiku-4-5-20251001`（`--setting-sources ''` で hook を読ませない） |
-| 手動優先 | `/rename` で人が付けた名前を検出したら、以降そのセッションには触らない |
-| 状態 | `~/.claude/session-titles/<session-id>.json` とログ `retitle.log` |
+**人が付けた名前には触らない。** 判定は「今の名前が、自分が最後に付けた名前と同じか」。
 
-`CLAUDE_RETITLE_DISABLE=1` で無効化、`CLAUDE_RETITLE_INTERVAL` で間隔、
-`CLAUDE_RETITLE_MODEL` でモデルを変えられる。
+- CLI・VSCode: コマンドは `"source": "session-title"` を付けて書く。最後の `custom-title` が
+  最後に印付きで書いた名前と違えば、`/rename` や VSCode の履歴から人が付けた名前。
+  印の有無だけでは判定できない（Claude Code 本体が、付けた名前を印なしで書き直すことがある）
+- デスクトップ: `<session-id>/custom-title.json` が、Claude が最後に `set_session_title` で
+  付けた名前と違えば、人がサイドバーで付け直した名前。人が付けた名前を変えようとすると
+  アプリも承認を求める
 
-**生成のために `claude -p` を起動するので、再帰しないよう二重に防いでいる。**
-`--setting-sources ''` で hook 自体を読ませず、さらに環境変数
-`CLAUDE_SESSION_RETITLE` を立てて子プロセス側の hook を即 return させる。
+**一覧は transcript の先頭 64KB と末尾 64KB しか読まない**（Claude Code 内の `$I = 65536`）。
+書き足した名前はその後の会話で窓から押し出されるので、hook は名前が末尾から 32KB 以上
+離れていたら同じ名前を書き直す（CLI・VSCode のみ。デスクトップはアプリが自分で書き直している）。
+
+コマンドは auto mode で「transcript の改ざん」として止められるため、`settings.json` の
+`permissions.allow` に `Bash(~/.claude/hooks/session-title:*)` を入れてある。
+
+旧方式（`hooks/session-retitle.sh`。`Stop` hook が Haiku を裏で呼んで名前を作っていた）の
+状態 `~/.claude/session-titles/` は使っていない。消してよい。
 
 ## ログの棚卸し（cclens）
 

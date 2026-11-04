@@ -251,21 +251,21 @@ else
     fi
   fi
 
-  # セッション名の自動付け替え（Stop hook）。実行ビットが落ちると hook は
-  # 黙って失敗するだけで、タイトルが更新されない理由が分からなくなる。
-  retitle="$CLAUDE_SRC/hooks/session-retitle.sh"
-  if [ -e "$retitle" ]; then
-    if [ -x "$retitle" ]; then
-      log_ok "hooks/session-retitle.sh は実行可能"
+  # セッション名の hook とコマンド（hooks/session-title）。実行ビットが落ちると
+  # hook は黙って失敗するだけで、名前が付かない理由が分からなくなる。
+  stitle="$CLAUDE_SRC/hooks/session-title"
+  if [ -e "$stitle" ]; then
+    if [ -x "$stitle" ]; then
+      log_ok "hooks/session-title は実行可能"
     else
-      log_fail "hooks/session-retitle.sh に実行ビットが無い -> chmod +x $retitle"
+      log_fail "hooks/session-title に実行ビットが無い -> chmod +x $stitle"
       note_problem
     fi
 
-    if grep -q 'session-retitle.sh' "$CLAUDE_SRC/settings.json" 2>/dev/null; then
-      log_ok "session-retitle.sh は settings.json の hook に登録済み"
+    if grep -q 'hooks/session-title.*--hook' "$CLAUDE_SRC/settings.json" 2>/dev/null; then
+      log_ok "session-title は settings.json の UserPromptSubmit hook に登録済み"
     else
-      log_fail "session-retitle.sh が settings.json の hook に未登録"
+      log_fail "session-title が settings.json の hook に未登録"
       note_problem
     fi
   fi
