@@ -77,5 +77,6 @@
     ]
   },
   "language": "japanese",
-  "effortLevel": "high"
+  "effortLevel": "high",
+  "theme": "auto"
 }
