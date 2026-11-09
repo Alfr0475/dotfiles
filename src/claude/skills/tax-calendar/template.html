@@ -1,0 +1,194 @@
+<title>納税カレンダー</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap">
+<style>
+/* 1 カラムの「納付書」：上に取り置き額、その下に日付順の支払い、根拠は折りたたみ */
+:root {
+  --paper: #f4f6f4;
+  --sheet: #ffffff;
+  --ink: #1b2321;
+  --muted: #5b6662;
+  --rule: #d3d9d6;
+  --accent: #17614f;      /* 納付書の緑 */
+  --accent-soft: #e2efe9;
+  --pay: #9a4a14;         /* 出ていくお金 */
+  --pay-soft: #f6e9df;
+  --back: #1f5b8f;        /* 戻ってくるお金 */
+  --back-soft: #e3ecf5;
+  --warn: #a3291f;
+  --warn-soft: #f8e4e1;
+  --seg1: #17614f; --seg2: #4b8f7c; --seg3: #8fbcae; --seg4: #c7ddd5;
+  --font-text: "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  --font-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #101513; --sheet: #161d1a; --ink: #e4eae7; --muted: #9aa6a1; --rule: #2b3532;
+    --accent: #5fc4a6; --accent-soft: #1b2e28; --pay: #e59a62; --pay-soft: #33261c;
+    --back: #7fb3e3; --back-soft: #1b2833; --warn: #f08a7e; --warn-soft: #3a1f1c;
+    --seg1: #5fc4a6; --seg2: #3f9a80; --seg3: #2d6b5a; --seg4: #24473d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #101513; --sheet: #161d1a; --ink: #e4eae7; --muted: #9aa6a1; --rule: #2b3532;
+  --accent: #5fc4a6; --accent-soft: #1b2e28; --pay: #e59a62; --pay-soft: #33261c;
+  --back: #7fb3e3; --back-soft: #1b2833; --warn: #f08a7e; --warn-soft: #3a1f1c;
+  --seg1: #5fc4a6; --seg2: #3f9a80; --seg3: #2d6b5a; --seg4: #24473d;
+  color-scheme: dark;
+}
+body {
+  background: var(--paper); color: var(--ink); font-family: var(--font-text);
+  font-size: 15px; line-height: 1.7;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 56px;
+}
+.wrap { max-width: 760px; margin: 0 auto; display: grid; gap: 28px; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+h2 { font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--muted); margin: 0 0 10px; text-wrap: balance; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline; justify-content: space-between; }
+.meta .name { font-weight: 900; font-size: 20px; letter-spacing: .04em; }
+.stamp { font-size: 13px; color: var(--muted); }
+.stamp b { color: var(--ink); font-weight: 500; }
+.stamp.old b { color: var(--warn); }
+
+.hero { background: var(--sheet); border: 1px solid var(--rule); border-top: 4px solid var(--accent); border-radius: 4px; padding: 22px 22px 20px; display: grid; gap: 16px; }
+.hero .label { font-size: 14px; color: var(--muted); }
+.hero .total { font-family: var(--font-num); font-weight: 600; font-size: clamp(34px, 8vw, 52px); line-height: 1.1; letter-spacing: -.01em; }
+.hero .total small { font-family: var(--font-text); font-size: .4em; font-weight: 500; margin-left: 4px; }
+.hero .sub { font-size: 13px; color: var(--muted); }
+.bar { display: flex; height: 14px; border-radius: 2px; overflow: hidden; background: var(--rule); }
+.bar span { display: block; height: 100%; }
+.legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 16px; margin: 0; padding: 0; list-style: none; }
+.legend li { display: grid; grid-template-columns: 10px 1fr; gap: 0 8px; align-items: baseline; font-size: 13px; }
+.legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.legend .amt { grid-column: 2; font-family: var(--font-num); font-size: 15px; }
+.extra { font-size: 13px; color: var(--muted); border-top: 1px dashed var(--rule); padding-top: 12px; }
+.cover { display: grid; gap: 6px; font-size: 13px; }
+.cover .row { display: flex; justify-content: space-between; gap: 12px; }
+
+.checks { display: grid; gap: 10px; }
+.check { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; background: var(--sheet); border: 1px solid var(--rule); border-left: 4px solid var(--warn); border-radius: 4px; padding: 12px 14px; }
+.check.info { border-left-color: var(--accent); }
+.check .when { grid-row: span 2; font-family: var(--font-num); font-size: 13px; color: var(--warn); white-space: nowrap; padding-top: 2px; }
+.check.info .when { color: var(--accent); }
+.check .t { font-weight: 700; }
+.check .b { font-size: 13.5px; color: var(--muted); grid-column: 2; }
+
+.timeline { list-style: none; margin: 0; padding: 0; background: var(--sheet); border: 1px solid var(--rule); border-radius: 4px; }
+.timeline li { display: grid; grid-template-columns: 88px 1fr auto; gap: 2px 16px; padding: 14px 16px; border-top: 1px solid var(--rule); align-items: baseline; }
+.timeline li:first-child { border-top: 0; }
+.timeline .date { font-family: var(--font-num); font-size: 14px; color: var(--muted); grid-row: span 2; }
+.timeline .date b { display: block; font-size: 18px; color: var(--ink); font-weight: 500; }
+.timeline .what { font-weight: 700; min-width: 0; }
+.timeline .amount { font-family: var(--font-num); font-size: 17px; text-align: right; white-space: nowrap; }
+.timeline .amount.pay { color: var(--pay); }
+.timeline .amount.back { color: var(--back); }
+.timeline .note { grid-column: 2 / 4; font-size: 13px; color: var(--muted); min-width: 0; }
+.timeline li.out { opacity: .72; }
+.pills { display: inline-flex; flex-wrap: wrap; gap: 4px; margin-left: 8px; vertical-align: 2px; }
+.pill { font-size: 11px; font-weight: 500; letter-spacing: .04em; padding: 1px 7px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.pill.est { background: var(--pay-soft); color: var(--pay); }
+.pill.fix { background: var(--back-soft); color: var(--back); }
+.pill.out { background: transparent; color: var(--muted); border: 1px solid var(--rule); }
+
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+td, th { padding: 7px 0; border-top: 1px solid var(--rule); text-align: left; vertical-align: baseline; font-weight: 400; }
+td.n, th.n { text-align: right; font-family: var(--font-num); white-space: nowrap; padding-left: 12px; }
+tr.sum td { font-weight: 700; }
+tr.sum td.n { font-weight: 600; }
+td .src { display: block; font-size: 12px; color: var(--muted); }
+.paid { background: var(--sheet); border: 1px solid var(--rule); border-radius: 4px; padding: 6px 16px; }
+details { background: var(--sheet); border: 1px solid var(--rule); border-radius: 4px; padding: 0 16px; }
+summary { cursor: pointer; padding: 14px 0; font-weight: 700; }
+summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+details .body { display: grid; gap: 20px; padding-bottom: 16px; }
+details h3 { font-size: 13px; color: var(--muted); margin: 0 0 4px; font-weight: 700; letter-spacing: .08em; }
+.foot { font-size: 12.5px; color: var(--muted); }
+@media (max-width: 520px) {
+  .timeline li { grid-template-columns: 64px 1fr; }
+  .timeline .amount { grid-column: 2; text-align: left; }
+  .timeline .note { grid-column: 2; }
+  .timeline .date { grid-row: span 3; }
+}
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script id="tax-data" type="application/json">
+/*__DATA__*/
+</script>
+<script>
+(function () {
+  const D = JSON.parse(document.getElementById('tax-data').textContent);
+  const yen = (n) => (n < 0 ? '−' : '') + Math.abs(Math.round(n)).toLocaleString('ja-JP');
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const days = Math.floor((Date.now() - new Date(D.asOf + 'T00:00:00+09:00').getTime()) / 86400000);
+  const segColors = ['var(--seg1)', 'var(--seg2)', 'var(--seg3)', 'var(--seg4)'];
+  const reserve = D.reserve.items.reduce((a, b) => a + b.amount, 0);
+  const pill = (p) => `<span class="pill ${esc(p.cls || '')}">${esc(p.text)}</span>`;
+
+  const parts = [];
+
+  parts.push(`<header class="meta">
+    <span class="name">納税カレンダー <span class="num">${esc(D.year)}</span>年分</span>
+    <span class="stamp ${days > 30 ? 'old' : ''}">freee <b class="num">${esc(D.asOf)}</b> 時点で計算${days > 30 ? `（${days}日前。<code>/tax-calendar</code> で更新）` : ''}</span>
+  </header>`);
+
+  const cov = D.cash ? `<div class="cover">
+      <div class="row"><span>口座残高</span><span class="num">${yen(D.cash.bank)} 円</span></div>
+      <div class="row"><span>これから入る売上（未入金）</span><span class="num">${yen(D.cash.receivable)} 円</span></div>
+    </div>` : '';
+
+  parts.push(`<section class="hero" aria-label="取っておく額">
+    <div>
+      <div class="label">${esc(D.reserve.label)}</div>
+      <div class="total">${yen(reserve)}<small>円</small></div>
+      <div class="sub">${esc(D.reserve.sub)}</div>
+    </div>
+    <div class="bar" role="img" aria-label="内訳">${D.reserve.items.map((it, i) => `<span style="width:${(it.amount / reserve * 100).toFixed(2)}%;background:${segColors[i % 4]}"></span>`).join('')}</div>
+    <ul class="legend">${D.reserve.items.map((it, i) => `<li><i style="background:${segColors[i % 4]}"></i><span>${esc(it.label)}</span><span class="amt">${yen(it.amount)}</span></li>`).join('')}</ul>
+    ${D.reserve.extra ? `<div class="extra">${esc(D.reserve.extra)}</div>` : ''}
+    ${cov}
+  </section>`);
+
+  if (D.checks && D.checks.length) {
+    parts.push(`<section><h2>確認すること</h2><div class="checks">${D.checks.map((c) => `
+      <div class="check ${c.level === 'info' ? 'info' : ''}">
+        <span class="when">${esc(c.when)}</span>
+        <span class="t">${esc(c.title)}</span>
+        <span class="b">${esc(c.body)}</span>
+      </div>`).join('')}</div></section>`);
+  }
+
+  parts.push(`<section><h2>これからの支払い</h2><ol class="timeline">${D.schedule.map((s) => {
+    const [y, m, d] = s.date.split('-');
+    const amt = s.amountText ? esc(s.amountText) : (s.kind === 'back' ? '+' : '') + yen(s.amount);
+    return `<li class="${s.inReserve === false ? 'out' : ''}">
+      <span class="date">${esc(y)}<b>${Number(m)}/${d ? Number(d) : '–'}</b></span>
+      <span class="what">${esc(s.label)}<span class="pills">${(s.pills || []).map(pill).join('')}</span></span>
+      <span class="amount ${s.kind === 'back' ? 'back' : 'pay'}">${amt}</span>
+      ${s.note ? `<span class="note">${esc(s.note)}</span>` : ''}
+    </li>`;
+  }).join('')}</ol></section>`);
+
+  if (D.paid && D.paid.length) {
+    parts.push(`<section><h2>${esc(D.year)}年にもう払ったもの</h2><div class="paid"><table><tbody>${D.paid.map((p) => `
+      <tr><td>${esc(p.label)}<span class="src">${esc(p.note || '')}</span></td><td class="n">${(p.amount < 0 ? '+' : '') + yen(Math.abs(p.amount))}</td></tr>`).join('')}
+    </tbody></table></div></section>`);
+  }
+
+  const tbl = (rows) => `<table><tbody>${rows.map((r) => `
+    <tr class="${r.sum ? 'sum' : ''}"><td>${esc(r.label)}${r.src ? `<span class="src">${esc(r.src)}</span>` : ''}</td><td class="n">${r.text ? esc(r.text) : yen(r.amount)}</td></tr>`).join('')}</tbody></table>`;
+
+  parts.push(`<details><summary>計算の根拠</summary><div class="body">
+    ${D.basis.map((b) => `<div><h3>${esc(b.title)}</h3>${tbl(b.rows)}</div>`).join('')}
+  </div></details>`);
+
+  parts.push(`<p class="foot">${esc(D.footnote)}</p>`);
+  document.getElementById('app').innerHTML = parts.join('');
+})();
+</script>
