@@ -30,8 +30,17 @@ VSCode は設定画面からの変更をリンク先（リポジトリ側）へ�
 ## 拡張
 
 `brew bundle` が `code --install-extension` で入れる。`code` コマンドが PATH に無いと
-入れられないので、`make doctor` が確認する（無ければ VSCode のコマンドパレットで
-`Shell Command: Install 'code' command in PATH`）。
+入れられないので、`make doctor` が確認する。
+
+`code` コマンドの入れ方は VSCode の置き場所で違う。
+
+- `~/Applications`（貸与PC。更新に管理者権限が要らない）: `src/.zshenv` が
+  `~/Applications/Visual Studio Code.app/Contents/Resources/app/bin` を PATH の前の方に足す。
+  コマンドパレットの `Shell Command: Install 'code' command in PATH` は
+  `/usr/local/bin` にリンクを作るので管理者権限が要り、使えない。
+  `/Applications` 版の `code` が残っていても（`/etc/paths.d` 経由の `/opt/homebrew/bin`）
+  こちらが優先される。`make doctor` は対話 zsh の `code` がこちらを指すことを確かめる
+- `/Applications`: コマンドパレットの `Shell Command: Install 'code' command in PATH`
 
 追加するときは Brewfile に `vscode "<publisher>.<name>"` を書いて `make brew`。
 入っている拡張の ID は `code --list-extensions` で出る。`make brewfile-dump` でも

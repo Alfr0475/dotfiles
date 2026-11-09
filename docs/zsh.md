@@ -25,7 +25,8 @@ PATH の組み立ては `.zshenv` の `__dotfiles_path_init` 関数にまとめ�
 
 - `typeset -gU path` で重複を除き、左側を優先する。何度呼んでも結果は同じ（冪等）
 - `(N-/)` 修飾子で、存在するディレクトリだけを足す
-- 順序は `~/.local/bin`（mise 本体、claude CLI）→ `$HOMEBREW_PREFIX/bin` → 既存の PATH
+- 順序は `~/.local/bin`（mise 本体、claude CLI）→ `~/Applications` の VSCode の `bin`
+  （`code` コマンド。[vscode.md](vscode.md)）→ `$HOMEBREW_PREFIX/bin` → 既存の PATH
 - `MANPATH` の末尾に空要素を置く。これが無いとシステムの man が引けなくなる
 - `brew shellenv` は毎回サブプロセスを起動するので使わず、出力内容を直接書いている。
   prefix（`~/.homebrew` か `/opt/homebrew`）の判定も `.zshenv` にある（[homebrew.md](homebrew.md)）

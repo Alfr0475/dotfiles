@@ -54,6 +54,10 @@ __dotfiles_path_init() {
   # 未導入のものが PATH に混ざらない。
   path=(
     "$HOME/.local/bin"(N-/)          # mise 本体などユーザ導入のバイナリ
+    # ~/Applications に入れた VSCode の code コマンド。コマンドパレットの
+    # 「Install 'code' command in PATH」は /usr/local/bin に書くので管理者権限が要る。
+    # /Applications 側の古い code（/etc/paths.d 経由の /opt/homebrew/bin）より優先させる。
+    "$HOME/Applications/Visual Studio Code.app/Contents/Resources/app/bin"(N-/)
     "$HOMEBREW_PREFIX/bin"(N-/)
     "$HOMEBREW_PREFIX/sbin"(N-/)
     $path

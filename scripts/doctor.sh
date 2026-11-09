@@ -390,8 +390,21 @@ log_header "VSCode"
 #------------------------------------------------------------------------------
 # 設定ファイルのリンクは上の「シンボリックリンク」で見ている。
 # ここでは Brewfile の vscode 行（拡張）を brew bundle が入れるのに要る code コマンドを見る。
+VSCODE_USER_BIN="$HOME/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 if [ ! -d "/Applications/Visual Studio Code.app" ] && [ ! -d "$HOME/Applications/Visual Studio Code.app" ]; then
   log_skip "Visual Studio Code.app が無い"
+elif [ -d "$VSCODE_USER_BIN" ]; then
+  # ~/Applications 版があれば、対話 zsh の code はそちらを指していなければならない
+  # （/Applications 版の code が /etc/paths.d 経由で残っていることがある）
+  code_path="$(zsh -ic 'whence -p code' 2>/dev/null)"
+  if [ "$code_path" = "$VSCODE_USER_BIN/code" ]; then
+    log_ok "code -> $(tilde "$code_path")"
+  else
+    # 親プロセス（tmux サーバーなど）から古い __MISE_ORIG_PATH を継いでいると、
+    # mise が .zshenv で足したパスを PATH の末尾へ回してしまう
+    log_fail "code が ~/Applications の VSCode を指していない: ${code_path:-(無し)} -> src/.zshenv の PATH か、tmux 等から継いだ古い __MISE_ORIG_PATH を確認"
+    note_problem
+  fi
 elif has code; then
   log_ok "code -> $(command -v code)"
 else
