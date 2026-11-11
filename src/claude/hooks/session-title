@@ -37,6 +37,7 @@ SIBLINGS = 10                      # 知らせに載せる同じリポジトリ�
 TAIL_BYTES = 65536                 # 一覧が読むのは transcript の先頭と末尾 64KB
 REFRESH_MARGIN = 32768             # 名前がこれ以上末尾から離れたら書き直す
 DESKTOP_TOOL = "mcp__ccd_session_mgmt__set_session_title"
+CLEAR_MARK = "<command-name>/clear</command-name>"
 INTERACTIVE = ("cli", "claude-vscode", "claude-desktop")
 
 
@@ -60,9 +61,16 @@ def scan(path):
       last_end   その行の終わりの位置（末尾からの距離を測るため）
       ours       このコマンドが最後に付けた名前（旧 session-retitle.sh の記録も含む）
       desktop    Claude が set_session_title で最後に付けた名前
+      inherited  最後の /clear の時点で付いていた名前（/clear 後に付け直していなければ）
       size       ファイルの大きさ
+
+    /clear しても session ID と名前は残り、Claude Code が印なしの custom-title で
+    書き写し続ける。これを人の名前と取り違えないよう、/clear 時点の名前と同じ
+    印なしの名前は inherited として区別する。/clear 後に別の名前が印なしで
+    付いたら、それは人が /rename した名前。
     """
-    info = {"last": None, "last_end": None, "ours": None, "desktop": None, "size": 0}
+    info = {"last": None, "last_end": None, "ours": None, "desktop": None,
+            "inherited": None, "size": 0}
     try:
         fh = open(path, "rb")
     except OSError:
@@ -72,7 +80,8 @@ def scan(path):
         for raw in fh:
             pos += len(raw)
             # 全行を JSON として読むと数 MB で遅いので、関係する行だけ読む
-            if b"custom-title" not in raw and DESKTOP_TOOL.encode() not in raw:
+            if (b"custom-title" not in raw and DESKTOP_TOOL.encode() not in raw
+                    and CLEAR_MARK.encode() not in raw):
                 continue
             try:
                 entry = json.loads(raw)
@@ -89,6 +98,12 @@ def scan(path):
                 # 旧 session-retitle.sh は uuid と timestamp を付けて書いていた
                 if entry.get("source") == SOURCE or ("uuid" in entry and "timestamp" in entry):
                     info["ours"] = title
+                    info["inherited"] = None
+                elif info["inherited"] is not None and title != info["inherited"]:
+                    # /clear 後に人が /rename した
+                    info["inherited"] = None
+            elif entry.get("type") == "user" and is_clear(entry):
+                info["inherited"] = info["last"]
             elif entry.get("type") == "assistant":
                 for block in (entry.get("message") or {}).get("content") or []:
                     if (isinstance(block, dict) and block.get("type") == "tool_use"
@@ -98,6 +113,21 @@ def scan(path):
                             info["desktop"] = args["title"]
         info["size"] = pos
     return info
+
+
+def is_clear(entry):
+    """ユーザーが打った /clear の記録か。
+
+    コマンドの記録は content が文字列で、先頭が <command-name>/clear</command-name>。
+    tool_result（content がリスト）や会話中の引用に同じ文字列があっても拾わない。
+    """
+    content = (entry.get("message") or {}).get("content")
+    return isinstance(content, str) and content.lstrip().startswith(CLEAR_MARK)
+
+
+def is_inherited(info):
+    """今の名前が /clear 前の会話から引き継いだだけの名前か。"""
+    return info["inherited"] is not None and info["last"] == info["inherited"]
 
 
 def read_json(path):
@@ -203,16 +233,24 @@ def hook():
                "（読み込まれていなければ ToolSearch で select:%s）" % (DESKTOP_TOOL, DESKTOP_TOOL))
     else:
         current = info["last"]
+        stale = is_inherited(info)
         # このコマンドが付けていない custom-title は、人が /rename などで付けた名前
-        if current is not None and current != info["ours"]:
+        if current is not None and current != info["ours"] and not stale:
             return
         # 一覧は末尾 64KB しか読まないので、離れたら同じ名前を書き直す（モデルは呼ばない）
-        if current and info["size"] - info["last_end"] > REFRESH_MARGIN:
+        # 引き継いだ名前は付け直してもらうので、印付きで書き直して固定しない
+        if not stale and current and info["size"] - info["last_end"] > REFRESH_MARGIN:
             append_title(transcript, session_id, current)
         shown = current
         how = 'Bash で `~/.claude/hooks/session-title "<新しい名前>"` を実行して変える'
 
-    lines = ["[セッション名] 今の名前: %s" % ("「%s」" % shown if shown else "未設定（このターンで必ず付ける）")]
+    if not is_desktop() and stale:
+        state = "「%s」（/clear 前の会話から引き継いだ名前。今の会話の内容でこのターンで必ず付け直す）" % shown
+    elif shown:
+        state = "「%s」" % shown
+    else:
+        state = "未設定（このターンで必ず付ける）"
+    lines = ["[セッション名] 今の名前: %s" % state]
     names = siblings(transcript)
     if names:
         lines.append("同じリポジトリの最近のセッション（これらと区別できる名前にする）:")
@@ -252,7 +290,7 @@ def command(args):
     transcript = found[0]
 
     info = scan(transcript)
-    if info["last"] is not None and info["last"] != info["ours"]:
+    if info["last"] is not None and info["last"] != info["ours"] and not is_inherited(info):
         die("人が付けた名前「%s」なので変えない" % info["last"])
     if info["last"] == title:
         print("変更なし: %s" % title)
