@@ -135,6 +135,7 @@ claude plugin test src/claude/mods/usage-limits
 | --- | --- | --- |
 | hook | `session-title --hook`（`UserPromptSubmit`） | 今の名前、同じリポジトリの最近のセッション名（10 件）、名前の変え方を `additionalContext` で知らせる |
 | コマンド | `session-title "<名前>"` | CLI・VSCode のセッションで Claude が Bash から呼ぶ。transcript に `custom-title` を書き足す |
+| 自己検査 | `session-title --self-test` | 判定と書式を、実際に起きた並びを再現した transcript で確かめる。`make doctor` が呼ぶ |
 
 **名前の届け先は画面で違う。** `CLAUDE_CODE_ENTRYPOINT` で切り替える。
 
@@ -142,14 +143,37 @@ claude plugin test src/claude/mods/usage-limits
   次のターンでアプリに書き直されるので、Claude にアプリのツール
   `mcp__ccd_session_mgmt__set_session_title` で変えさせる。コマンドは拒否する
 - CLI（`cli`）・VSCode 拡張（`claude-vscode`）: 一覧は transcript の `custom-title` を読むので、
-  コマンドで書き足せば届く
+  コマンドで書き足せば届く（下の「CLI・VSCode の名前の正本」の書式で書くこと）
 - それ以外（`claude -p` など）: 何もしない
+
+### CLI・VSCode の名前の正本
+
+2.1.322 の本体コードで確かめた仕組み。
+
+- **正本は Claude Code のメモリ（`currentSessionTitle`）。** 本体は毎ターン・終了時などに
+  メタデータ（last-prompt・custom-title・mode など）を印なしで transcript の末尾に書き足し直す
+  （`planReAppendSessionMetadata`）
+- 書き足す前に末尾の `custom-title` を読み直してメモリを合わせるが、拾うのは
+  `'"type":"custom-title"'` と `'"customTitle":"'` を**文字列として含む行だけ**。
+  `json.dumps` の既定の書式（`"type": "custom-title"`、空白入り）だと読み直されず、
+  メモリの古い名前で毎ターン上書きされる。**コマンドは空白なしの JSON で書く**
+- resume のときは transcript を最後まで読み、最後の `custom-title` をメモリに入れる
+- `/rename` は、印なしの `custom-title`（空白なし）と `<session-id>/custom-title.json` を書き、
+  メモリも変える。`custom-title.json` は、一覧が transcript の末尾に名前を見つけられないときの
+  予備でしかない（メモリの元にはならない）。一覧は末尾 → `custom-title.json` の順で読む
+- **`/clear` で session ID は変わる。** 本体はメモリの名前を、新しい transcript の先頭
+  （`/clear` の記録より前）に書き写す
 
 **人が付けた名前には触らない。** 判定は「今の名前が、自分が最後に付けた名前と同じか」。
 
-- CLI・VSCode: コマンドは `"source": "session-title"` を付けて書く。最後の `custom-title` が
+- CLI・VSCode: コマンドは `"source":"session-title"` を付けて書く。最後の `custom-title` が
   最後に印付きで書いた名前と違えば、`/rename` や VSCode の履歴から人が付けた名前。
-  印の有無だけでは判定できない（Claude Code 本体が、付けた名前を印なしで書き直すことがある）
+  印の有無だけでは判定できない（本体はメモリの名前を印なしで書き足し直す）
+- ただし次の名前は「古い名前」として付け直しを促す
+  - `/clear` 前から持ち越した名前（`/clear` の時点までに出ていた名前）
+  - 最後に印付きで書いた時点までに出ていた名前が、印なしで再び出てきたもの。
+    空白入りの書式で書いていた頃に、メモリの古い名前で上書きされたセッションがこれに当たる
+- 人が `/rename` で以前と同じ名前に戻した場合は、古い名前と見分けられない（受け入れている）
 - デスクトップ: `<session-id>/custom-title.json` が、Claude が最後に `set_session_title` で
   付けた名前と違えば、人がサイドバーで付け直した名前。人が付けた名前を変えようとすると
   アプリも承認を求める

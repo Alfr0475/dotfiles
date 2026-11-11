@@ -268,6 +268,15 @@ else
       log_fail "session-title が settings.json の hook に未登録"
       note_problem
     fi
+
+    # 人の名前と古い名前の見分け方と、Claude Code に読み直される書式で書くこと。
+    # 崩れると、付け直した名前が Claude Code のメモリの古い名前で上書きされる。
+    if "$stitle" --self-test >/dev/null 2>&1; then
+      log_ok "session-title の自己検査が通る"
+    else
+      log_fail "session-title の自己検査が失敗 -> $stitle --self-test"
+      note_problem
+    fi
   fi
 
   # 開発フロー（dd-* スキル）の保存先を決めるスクリプト。各スキルがこれを

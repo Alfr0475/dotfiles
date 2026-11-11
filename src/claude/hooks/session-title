@@ -13,15 +13,29 @@
       CLI・VSCode 拡張のセッションで、Claude が Bash から呼んで名前を変える。
       transcript に custom-title を書き足す。
 
+  session-title --self-test
+      判定と書式の自己検査。make doctor から呼ぶ。
+
 デスクトップアプリのセッションでは、名前の正本はアプリにある。transcript に
 書いても次のターンでアプリに書き直されるので、Claude にはアプリのツール
 （set_session_title）で変えさせ、このコマンドは使わせない。
 
+CLI・VSCode の名前の正本は Claude Code のメモリ（currentSessionTitle）。
+Claude Code は毎ターン・終了時にその値を印なしの custom-title で transcript に
+書き足し直す。書き足す前に末尾の custom-title を読み直してメモリを合わせるが、
+拾うのは '"type":"custom-title"' と '"customTitle":"' を含む行だけ。
+だからこのコマンドは空白なしの JSON で書く（空白入りだと読み直されず、
+メモリの古い名前で上書きされる）。
+
 人が付けた名前の見分け方:
   名前を最後に付けたのが自分（CLI・VSCode はこのコマンド、デスクトップは
   Claude の set_session_title 呼び出し）で、今の名前がそれと同じなら自動の名前。
-  違えば人が付けた名前。印の有無だけでは判定できない。Claude Code 本体が、
-  付けた名前を印なしの custom-title で書き直すことがあるため。
+  違えば、基本は人が付けた名前。ただし次の名前は「古い名前」として付け直す。
+    - /clear 前から持ち越した名前（/clear で session ID は変わるが、Claude Code が
+      メモリの名前を新しい transcript の先頭に書き写す）
+    - 最後にこのコマンドで書く前に出ていた名前が、印なしで再び出てきたもの
+      （Claude Code のメモリに残った古い名前の書き戻し）
+  人が /rename で以前と同じ名前に戻した場合は見分けられない（受け入れている）。
 
 設計の経緯は ideas-vault の inbox/202611-セッション名の自動リネーム.md。
 """
@@ -59,18 +73,18 @@ def scan(path):
     返す dict:
       last       最後の custom-title の名前
       last_end   その行の終わりの位置（末尾からの距離を測るため）
-      ours       このコマンドが最後に付けた名前（旧 session-retitle.sh の記録も含む）
+      ours       このコマンドが最後に付けた名前（旧 session-retitle.sh の記録も含む）。
+                 /clear で消す（/clear 前の会話の名前なので付け直す）
+      stale      古い名前の集合。目印（このコマンドの書き込みか /clear）の時点
+                 までに出ていた名前。印なしでこれに戻ったら、人ではなく
+                 Claude Code のメモリからの書き戻し
+      cleared    最後の目印が /clear か
       desktop    Claude が set_session_title で最後に付けた名前
-      inherited  最後の /clear の時点で付いていた名前（/clear 後に付け直していなければ）
       size       ファイルの大きさ
-
-    /clear しても session ID と名前は残り、Claude Code が印なしの custom-title で
-    書き写し続ける。これを人の名前と取り違えないよう、/clear 時点の名前と同じ
-    印なしの名前は inherited として区別する。/clear 後に別の名前が印なしで
-    付いたら、それは人が /rename した名前。
     """
     info = {"last": None, "last_end": None, "ours": None, "desktop": None,
-            "inherited": None, "size": 0}
+            "stale": set(), "cleared": False, "size": 0}
+    seen = set()
     try:
         fh = open(path, "rb")
     except OSError:
@@ -98,12 +112,13 @@ def scan(path):
                 # 旧 session-retitle.sh は uuid と timestamp を付けて書いていた
                 if entry.get("source") == SOURCE or ("uuid" in entry and "timestamp" in entry):
                     info["ours"] = title
-                    info["inherited"] = None
-                elif info["inherited"] is not None and title != info["inherited"]:
-                    # /clear 後に人が /rename した
-                    info["inherited"] = None
+                    info["stale"] = seen - {title}
+                    info["cleared"] = False
+                seen.add(title)
             elif entry.get("type") == "user" and is_clear(entry):
-                info["inherited"] = info["last"]
+                info["ours"] = None
+                info["stale"] = set(seen)
+                info["cleared"] = True
             elif entry.get("type") == "assistant":
                 for block in (entry.get("message") or {}).get("content") or []:
                     if (isinstance(block, dict) and block.get("type") == "tool_use"
@@ -125,9 +140,14 @@ def is_clear(entry):
     return isinstance(content, str) and content.lstrip().startswith(CLEAR_MARK)
 
 
-def is_inherited(info):
-    """今の名前が /clear 前の会話から引き継いだだけの名前か。"""
-    return info["inherited"] is not None and info["last"] == info["inherited"]
+def is_stale(info):
+    """今の名前が、付け直すべき古い名前か（/clear 前の名前、または書き戻し）。"""
+    return info["last"] is not None and info["last"] != info["ours"] and info["last"] in info["stale"]
+
+
+def is_human(info):
+    """今の名前が人の付けた名前か。"""
+    return info["last"] is not None and info["last"] != info["ours"] and not is_stale(info)
 
 
 def read_json(path):
@@ -147,10 +167,11 @@ def desktop_title(transcript):
 
 
 def tail_title(path):
-    """一覧と同じく末尾だけを見て、そのセッションの今の名前を返す。"""
-    data = read_json(os.path.join(path[:-len(".jsonl")], "custom-title.json"))
-    if isinstance(data, dict) and isinstance(data.get("customTitle"), str):
-        return data["customTitle"]
+    """一覧と同じ順（transcript の末尾 → custom-title.json）で今の名前を返す。
+
+    custom-title.json は /rename と /clear のときにしか書かれず古いことがあるので、
+    末尾に名前があればそちらを使う。
+    """
     try:
         with open(path, "rb") as fh:
             fh.seek(0, os.SEEK_END)
@@ -173,7 +194,12 @@ def tail_title(path):
             custom = entry.get("customTitle")
         elif entry.get("type") == "ai-title":
             ai = entry.get("aiTitle")
-    return custom or ai
+    if custom:
+        return custom
+    data = read_json(os.path.join(path[:-len(".jsonl")], "custom-title.json"))
+    if isinstance(data, dict) and isinstance(data.get("customTitle"), str):
+        return data["customTitle"]
+    return ai
 
 
 def siblings(transcript):
@@ -192,12 +218,18 @@ def siblings(transcript):
     return names
 
 
-def append_title(transcript, session_id, title):
+def title_line(session_id, title):
     entry = {"type": "custom-title", "customTitle": title,
              "sessionId": session_id, "source": SOURCE}
+    # 空白なしで書く。Claude Code は '"type":"custom-title"' を含む行しか
+    # 読み直さないので、空白入りだとメモリの古い名前で上書きされる
+    return json.dumps(entry, ensure_ascii=False, separators=(",", ":")) + "\n"
+
+
+def append_title(transcript, session_id, title):
     # O_APPEND への 1 回の write なので、実行中のセッションの追記と混ざらない
     with open(transcript, "a", encoding="utf-8") as fh:
-        fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        fh.write(title_line(session_id, title))
 
 
 #------------------------------------------------------------------
@@ -233,19 +265,20 @@ def hook():
                "（読み込まれていなければ ToolSearch で select:%s）" % (DESKTOP_TOOL, DESKTOP_TOOL))
     else:
         current = info["last"]
-        stale = is_inherited(info)
-        # このコマンドが付けていない custom-title は、人が /rename などで付けた名前
-        if current is not None and current != info["ours"] and not stale:
+        stale = is_stale(info)
+        # このコマンドが付けておらず、古い名前でもない custom-title は、人が /rename などで付けた名前
+        if is_human(info):
             return
         # 一覧は末尾 64KB しか読まないので、離れたら同じ名前を書き直す（モデルは呼ばない）
-        # 引き継いだ名前は付け直してもらうので、印付きで書き直して固定しない
+        # 古い名前は付け直してもらうので、印付きで書き直して固定しない
         if not stale and current and info["size"] - info["last_end"] > REFRESH_MARGIN:
             append_title(transcript, session_id, current)
         shown = current
         how = 'Bash で `~/.claude/hooks/session-title "<新しい名前>"` を実行して変える'
 
     if not is_desktop() and stale:
-        state = "「%s」（/clear 前の会話から引き継いだ名前。今の会話の内容でこのターンで必ず付け直す）" % shown
+        why = "/clear 前の会話から引き継いだ名前" if info["cleared"] else "Claude Code が書き戻した古い名前"
+        state = "「%s」（%s。今の会話の内容でこのターンで必ず付け直す）" % (shown, why)
     elif shown:
         state = "「%s」" % shown
     else:
@@ -290,7 +323,7 @@ def command(args):
     transcript = found[0]
 
     info = scan(transcript)
-    if info["last"] is not None and info["last"] != info["ours"] and not is_inherited(info):
+    if is_human(info):
         die("人が付けた名前「%s」なので変えない" % info["last"])
     if info["last"] == title:
         print("変更なし: %s" % title)
@@ -299,7 +332,83 @@ def command(args):
     print("セッション名を変えた: %s" % title)
 
 
+#------------------------------------------------------------------
+# 自己検査（make doctor から呼ぶ）
+#------------------------------------------------------------------
+
+def self_test():
+    """実際に起きた並びを再現した transcript で、判定と書式を確かめる。"""
+    import tempfile
+
+    sid = "00000000-0000-0000-0000-000000000000"
+
+    def cc(title):      # Claude Code 本体がメモリから書き足す行
+        return json.dumps({"type": "custom-title", "customTitle": title, "sessionId": sid},
+                          ensure_ascii=False, separators=(",", ":")) + "\n"
+
+    def legacy(title):  # 空白入りの書式で書いていた頃のこのコマンドの行
+        return json.dumps({"type": "custom-title", "customTitle": title,
+                           "sessionId": sid, "source": SOURCE}, ensure_ascii=False) + "\n"
+
+    def clear():
+        return json.dumps({"type": "user", "message": {"role": "user", "content":
+                           CLEAR_MARK + "\n<command-message>clear</command-message>"}}) + "\n"
+
+    def ours(title):
+        return title_line(sid, title)
+
+    # (名前, 行, 期待: "ours" / "stale" / "human" / "none")
+    cases = [
+        ("名前なし", [], "none"),
+        ("このコマンドの名前", [ours("A"), cc("A")], "ours"),
+        ("人の /rename", [ours("A"), cc("A"), cc("H")], "human"),
+        # /clear: 新しい transcript の先頭に前の名前が持ち越される（a529dd37 の 0〜5 行目）
+        ("/clear で持ち越した名前", [cc("OLD"), clear(), cc("OLD")], "stale"),
+        ("/clear 前に自分が付けた名前", [ours("A"), clear(), cc("A")], "stale"),
+        ("/clear 後の人の /rename", [cc("OLD"), clear(), cc("H")], "human"),
+        ("/clear 後に付け直した名前", [cc("OLD"), clear(), ours("NEW"), cc("NEW")], "ours"),
+        # 付け直した後にメモリの古い名前が書き戻された（a529dd37 の 744→761 行目）
+        ("/clear 後の書き戻し", [cc("OLD"), clear(), legacy("NEW"), cc("OLD")], "stale"),
+        # resume で読んだ名前の書き戻し（db6a6291 の 958→978 行目）
+        ("resume 後の書き戻し", [legacy("A"), legacy("B"), cc("B"), legacy("C"), cc("B")], "stale"),
+        ("書き戻しの後の人の /rename", [ours("A"), ours("B"), cc("A"), cc("H")], "human"),
+    ]
+
+    failed = 0
+    tmp = tempfile.mkdtemp(prefix="session-title-")
+    try:
+        for i, (name, lines, want) in enumerate(cases):
+            path = os.path.join(tmp, "%d.jsonl" % i)
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.writelines(lines)
+            info = scan(path)
+            if info["last"] is None:
+                got = "none"
+            elif is_stale(info):
+                got = "stale"
+            elif is_human(info):
+                got = "human"
+            else:
+                got = "ours"
+            ok = got == want
+            failed += not ok
+            print("%s %s（期待 %s / 結果 %s）" % ("ok  " if ok else "FAIL", name, want, got))
+            os.remove(path)
+    finally:
+        os.rmdir(tmp)
+
+    # Claude Code が末尾から名前を読み直すときの絞り込みと同じ条件
+    line = title_line(sid, '名前 "引用" ／ 段階')
+    ok = ('"type":"custom-title"' in line and '"customTitle":"' in line
+          and json.loads(line)["customTitle"] == '名前 "引用" ／ 段階')
+    failed += not ok
+    print("%s 書く行が Claude Code に読み直される書式" % ("ok  " if ok else "FAIL"))
+    return failed == 0
+
+
 def main():
+    if sys.argv[1:] == ["--self-test"]:
+        sys.exit(0 if self_test() else 1)
     if sys.argv[1:] == ["--hook"]:
         try:
             hook()
